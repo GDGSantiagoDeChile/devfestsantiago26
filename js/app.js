@@ -229,7 +229,7 @@ function renderPlenaryCard(block) {
       aria-label="Ver detalles de ${block.title}"
     >
       <div class="plenary-time-col">
-        <span class="time-pill">${block.startTime} – ${block.endTime}</span>
+        <span class="time-pill">🕒 ${block.startTime} – ${block.endTime}</span>
         <span class="duration-micro">${durationMinutes} MIN</span>
       </div>
       <div class="plenary-avatar-col">
@@ -251,13 +251,28 @@ function renderPlenaryCard(block) {
 }
 
 /**
+ * Formatea el nombre del speaker (o lista de panelistas si están separados por " · ")
+ */
+function formatSpeakerDisplay(speakerStr) {
+  if (!speakerStr.includes(' · ')) {
+    return `<h4 class="block-speaker-name">${speakerStr}</h4>`;
+  }
+  const parts = speakerStr.split(' · ');
+  return `
+    <div class="block-panelists-list">
+      ${parts.map(p => `<div class="panelist-item">▪ ${p}</div>`).join('')}
+    </div>
+  `;
+}
+
+/**
  * Renderiza una tarjeta de sesión dentro de una columna de Sala (Charla, Taller, Panel o Relleno)
  */
 function renderTrackBlockCard(block, room) {
   if (block.type === 'transition') {
     return `
       <div class="track-transition-slot" style="--slot-mins: ${block.durationMinutes}; flex-grow: ${block.durationMinutes};" title="Intervalo de transición de ${block.durationMinutes} minutos">
-        <span class="transition-text">⏱ ${block.startTime}–${block.endTime} · Intervalo de transición (${block.durationMinutes}m)</span>
+        <span class="transition-text">⏱ ${block.startTime}–${block.endTime} · Transición (${block.durationMinutes}m)</span>
       </div>
     `;
   }
@@ -285,14 +300,16 @@ function renderTrackBlockCard(block, room) {
       role="button"
       aria-label="${block.formatLabel}: ${block.title} por ${block.speaker}, de ${block.startTime} a ${block.endTime}"
     >
-      <div class="block-card-header">
-        <span class="block-time-badge">${block.startTime} – ${block.endTime}</span>
-        <span class="block-duration-pill">${block.durationMinutes} MIN</span>
-      </div>
+      <div class="block-card-top">
+        <div class="block-card-header">
+          <span class="block-time-badge">🕒 ${block.startTime} – ${block.endTime}</span>
+          <span class="block-duration-pill">${block.durationMinutes} MIN</span>
+        </div>
 
-      <div class="block-type-row">
-        <span class="block-format-chip">${block.formatLabel}</span>
-        <span class="block-affiliation-chip badge-${block.badgeColor || room.color}">${block.badge}</span>
+        <div class="block-type-row">
+          <span class="block-format-chip">${block.roomLabel || room.name} · ${block.formatLabel}</span>
+          <span class="block-affiliation-chip badge-${block.badgeColor || room.color}">${block.badge}</span>
+        </div>
       </div>
 
       <div class="block-main-body">
@@ -301,7 +318,7 @@ function renderTrackBlockCard(block, room) {
             ${renderKunioCharacter(block.avatar, 'kunio-sm')}
           </div>
           <div class="block-speaker-meta">
-            <h4 class="block-speaker-name">${block.speaker}</h4>
+            ${formatSpeakerDisplay(block.speaker)}
             ${block.moderators ? `<p class="block-moderators">${block.moderators}</p>` : ''}
             <p class="block-duration-note">${block.durationNote || `${block.durationMinutes} minutos`}</p>
           </div>
@@ -311,8 +328,10 @@ function renderTrackBlockCard(block, room) {
       </div>
 
       <div class="block-card-footer">
-        <div class="block-tech-icons">${techIconsHtml}</div>
-        <div class="block-tags-list">${tagsHtml}</div>
+        <div class="block-footer-meta">
+          <div class="block-tech-icons">${techIconsHtml}</div>
+          <div class="block-tags-list">${tagsHtml}</div>
+        </div>
         <div class="block-cta-row">
           <span class="press-start-hint">▶ PULSAR PARA VER DETALLE</span>
         </div>
@@ -326,14 +345,6 @@ function renderTrackBlockCard(block, room) {
  */
 function renderTandaSection(tanda) {
   const totalTandaMins = timeToMinutes(tanda.endTime) - timeToMinutes(tanda.startTime);
-
-  // Regla de tiempo lateral (cada 15 o 30 minutos)
-  const timeTicks = [];
-  const startM = timeToMinutes(tanda.startTime);
-  const endM = timeToMinutes(tanda.endTime);
-  for (let m = startM; m <= endM; m += 30) {
-    timeTicks.push(minutesToTime(m));
-  }
 
   const visibleRooms = EVENT_DATA.rooms.filter(
     r => state.activeRoomFilter === 'all' || state.activeRoomFilter === r.id
@@ -390,7 +401,7 @@ function renderTandaSection(tanda) {
 }
 
 /**
- * Renderiza toda la Agenda / Programa
+ * Renderiza toda la Agenda
  */
 function renderFullSchedule() {
   const container = document.getElementById('schedule-root');
