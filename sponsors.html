@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sponsors & Comunidades · DevFest Santiago de Chile 2026</title>
+  <meta name="description" content="Sponsors oficiales, sede anfitriona y sponsors comunitarios del DevFest Santiago de Chile 2026." />
+  <link rel="icon" type="image/png" href="assets/img/gdg-santiago-logo.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- MARQUESINA DE ANUNCIOS -->
+  <div class="marquee-bar" role="region" aria-label="Anuncios importantes previos al evento">
+    <div class="marquee-badge">
+      <span>📢</span>
+      <span class="hide-mobile">AVISOS DEVFEST</span>
+    </div>
+    <div class="marquee-viewport">
+      <div class="marquee-track" id="marquee-content"></div>
+    </div>
+  </div>
+
+  <!-- ENCABEZADO -->
+  <header class="site-header">
+    <div class="gdg-color-strip" aria-hidden="true">
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <div class="header-inner">
+      <a href="index.html" class="brand-link">
+        <img src="assets/img/gdg-santiago-logo.png" alt="Logo GDG Santiago de Chile" class="brand-logo-img" />
+        <div class="brand-title-wrap">
+          <span class="brand-pixel-tag">GDG SANTIAGO DE CHILE · 2026</span>
+          <span class="brand-main-name">DEVFEST SANTIAGO '26</span>
+        </div>
+      </a>
+
+      <nav class="main-nav" aria-label="Navegación principal">
+        <a href="index.html#agenda" class="nav-link-8bit">🕹️ Agenda</a>
+        <a href="index.html#sede" class="nav-link-8bit">🏛️ Sede</a>
+        <a href="sponsors.html" class="nav-link-8bit active">🤝 Sponsors</a>
+        <a href="https://luma.com/7p4i60n3" target="_blank" rel="noopener noreferrer" class="btn-8bit btn-8bit-primary">
+          🎟️ REGISTRO EN LUMA
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="sponsors-page-main" style="padding-top: 36px;">
+    <div class="section-header-8bit">
+      <div class="section-title-group">
+        <h2>🤝 SPONSORS OFICIALES & COMUNITARIOS</h2>
+        <p>
+          Agradecemos a las organizaciones, empresas e instituciones que impulsan el ecosistema tecnológico en Chile.
+          *(En esta sección utilizamos los logos institucionales oficiales sin pixelar).*
+        </p>
+      </div>
+      <a href="index.html#agenda" class="btn-8bit btn-8bit-yellow">
+        ← VOLVER A LA AGENDA
+      </a>
+    </div>
+
+    <!-- 1. SEDE ANFITRIONA -->
+    <section class="sponsors-tier-block">
+      <h3 class="sponsors-tier-heading">🏛️ SEDE ANFITRIONA & PARTNER ACADÉMICO</h3>
+      <div class="sponsors-grid" id="sponsors-host-grid"></div>
+    </section>
+
+    <!-- 2. SPONSORS OFICIALES Y PARTICIPACIÓN EN INDUSTRIA -->
+    <section class="sponsors-tier-block">
+      <h3 class="sponsors-tier-heading">⭐ SPONSORS & EMPRESAS PARTICIPANTES</h3>
+      <div class="sponsors-grid" id="sponsors-official-grid"></div>
+    </section>
+
+    <!-- 3. SPONSORS COMUNITARIOS Y ORGANIZADOR -->
+    <section class="sponsors-tier-block">
+      <h3 class="sponsors-tier-heading">💚 COMUNIDAD ORGANIZADORA & SPONSORS COMUNITARIOS</h3>
+      <div class="sponsors-grid" id="sponsors-community-grid"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="unab-accreditation-strip">
+      <img src="assets/img/unab-acreditacion.png" alt="Universidad Andrés Bello - Acreditación Institucional" loading="lazy" />
+    </div>
+    <div class="gdg-color-strip" aria-hidden="true">
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <div class="footer-main">
+      <div class="footer-inner">
+        <div class="footer-copy">
+          <p><strong>GDG SANTIAGO DE CHILE</strong> · DevFest Santiago 2026</p>
+          <p>Sábado 7 de noviembre de 2026 · 09:00–14:00 · Universidad Andrés Bello, Sede Bellavista.</p>
+        </div>
+        <div class="footer-links">
+          <a href="index.html#agenda">Agenda</a>
+          <a href="sponsors.html">Sponsors & Comunidad</a>
+          <a href="https://luma.com/7p4i60n3" target="_blank" rel="noopener noreferrer">Registro en Luma</a>
+          <a href="https://github.com/GDGSantiagoDeChile/devfestsantiago26" target="_blank" rel="noopener noreferrer">GitHub Repo</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
