@@ -1605,26 +1605,12 @@ body {
 }
 
 /* ==========================================================================
-   8. PIE DE PÁGINA + HUINCHA INSTITUCIONAL UNAB
+   8. PIE DE PÁGINA OFICIAL GDG SANTIAGO DE CHILE
    ========================================================================== */
 .site-footer {
-  background-color: var(--bw-white);
+  background-color: var(--bw-black);
   border-top: 4px solid var(--bw-black);
   margin-top: 40px;
-}
-
-.unab-accreditation-strip {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 16px 16px 8px;
-  text-align: center;
-}
-
-.unab-accreditation-strip img {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-  image-rendering: auto;
 }
 
 .footer-main {
@@ -1647,6 +1633,14 @@ body {
 .footer-copy {
   font-size: 0.88rem;
   color: var(--bw-gray-300);
+}
+
+.footer-copy a {
+  text-decoration: none;
+}
+
+.footer-copy a:hover strong {
+  text-decoration: underline;
 }
 
 .footer-copy strong {
