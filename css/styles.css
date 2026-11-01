@@ -599,9 +599,9 @@ body {
   animation: kunioWalkBob 0.7s steps(2, end) infinite;
 }
 
-.kunio-sm { width: 40px; height: 50px; }
-.kunio-md { width: 64px; height: 80px; }
-.kunio-lg { width: 92px; height: 115px; }
+.kunio-sm { width: 42px; height: 56px; aspect-ratio: 3 / 4; }
+.kunio-md { width: 66px; height: 88px; aspect-ratio: 3 / 4; }
+.kunio-lg { width: 96px; height: 128px; aspect-ratio: 3 / 4; }
 
 .kunio-sprite svg {
   width: 100%;
