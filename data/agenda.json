@@ -1,0 +1,344 @@
+{
+  "lastUpdated": "4 de noviembre de 2026",
+  "title": "Cronograma general",
+  "subtitle": "Un auditorio y tres salas con talleres / charlas de especialidad simultáneos",
+  "footerNote": "Seis talleres / charlas de especialidad de 90 minutos. Apertura y cierre en el auditorio, con retransmisión en salas.",
+  "rooms": [
+    {
+      "id": "auditorio",
+      "name": "AUDITORIO",
+      "subtitle": "Charlas & Conversatorio",
+      "color": "blue"
+    },
+    {
+      "id": "sala1",
+      "name": "SALA 1",
+      "subtitle": "Taller / Charla de Especialidad",
+      "color": "red"
+    },
+    {
+      "id": "sala2",
+      "name": "SALA 2",
+      "subtitle": "Taller / Charla de Especialidad",
+      "color": "yellow"
+    },
+    {
+      "id": "sala3",
+      "name": "SALA 3",
+      "subtitle": "Taller / Charla de Especialidad",
+      "color": "green"
+    }
+  ],
+  "scheduleConfig": {
+    "autoFillGaps": true,
+    "minGapMinutesToFill": 10,
+    "defaultFillerTitle": "Bloque Flexible · Q&A Libre / Demos / Networking",
+    "defaultFillerDescription": "Espacio flexible para preguntas extendidas, demostraciones en vivo con el speaker, configuración de entorno o networking entre asistentes."
+  },
+  "blocks": [
+    {
+      "id": "bienvenida-unab",
+      "kind": "plenary",
+      "type": "plenary",
+      "startTime": "09:00",
+      "endTime": "09:15",
+      "title": "Palabras de bienvenida de UNAB",
+      "subtitle": "Apertura institucional en el auditorio principal, con retransmisión en salas",
+      "speaker": "Universidad Andrés Bello (UNAB)",
+      "affiliation": "Sede Anfitriona · Campus Bellavista",
+      "badge": "UNAB",
+      "avatar": "panel",
+      "roomLabel": "AUDITORIO + SALAS 1, 2 Y 3",
+      "description": "Palabras de bienvenida oficial de la Universidad Andrés Bello desde el Campus Bellavista. Apertura en el auditorio principal con retransmisión simultánea en las tres salas.",
+      "tags": ["Bienvenida", "UNAB", "Apertura", "DevFest 2026"],
+      "techLogos": ["community"]
+    },
+    {
+      "id": "bienvenida-gdg",
+      "kind": "plenary",
+      "type": "plenary",
+      "startTime": "09:15",
+      "endTime": "09:30",
+      "title": "Palabras de GDG Santiago de Chile y GDG Valparaíso",
+      "subtitle": "Bienvenida comunitaria en el auditorio principal, con retransmisión en salas",
+      "speaker": "GDG Santiago de Chile y GDG Valparaíso",
+      "affiliation": "Comunidades Organizadoras",
+      "badge": "GDG SANTIAGO + VALPARAÍSO",
+      "avatar": "panel",
+      "roomLabel": "AUDITORIO + SALAS 1, 2 Y 3",
+      "description": "Palabras de apertura de las comunidades Google Developer Groups: GDG Santiago de Chile y GDG Valparaíso. Presentación del cronograma general, dinámica del auditorio y de las tres salas con talleres y charlas de especialidad simultáneos.",
+      "tags": ["GDG Santiago", "GDG Valparaíso", "Comunidad", "DevFest 2026"],
+      "techLogos": ["community", "ai", "cloud", "android"]
+    },
+    {
+      "id": "tanda-1",
+      "kind": "tanda",
+      "name": "PRIMERA TANDA",
+      "subtitle": "09:30 – 11:00 · Auditorio y tres salas con talleres / charlas de especialidad simultáneos",
+      "startTime": "09:30",
+      "endTime": "11:00",
+      "note": "Talleres / charlas de especialidad de 90 minutos. Pausa común y cambio de salas de 11:00 a 11:20.",
+      "tracks": {
+        "auditorio": [
+          {
+            "id": "t1-aud-1",
+            "type": "talk",
+            "formatLabel": "CHARLA",
+            "startTime": "09:30",
+            "endTime": "10:10",
+            "durationNote": "40 minutos · Auditorio Principal",
+            "title": "Keynote: Inteligencia Artificial y Cloud en la Nueva Era de Desarrollo",
+            "speaker": "Mikaeri Ohana",
+            "affiliation": "Google",
+            "badge": "Google",
+            "badgeColor": "blue",
+            "avatar": "mikaeri",
+            "roomLabel": "AUDITORIO",
+            "description": "Sesión en el Auditorio Principal a cargo de Mikaeri Ohana (Developer Relations Engineer en Google). Exploraremos cómo la Inteligencia Artificial generativa, el Machine Learning moderno y la nube están transformando la forma en que diseñamos y desplegamos soluciones reales.",
+            "tags": ["Google Cloud", "Gemini IA", "Machine Learning", "Keynote"],
+            "techLogos": ["ai", "cloud"]
+          },
+          {
+            "id": "t1-aud-2",
+            "type": "talk",
+            "formatLabel": "CHARLA",
+            "startTime": "10:15",
+            "endTime": "10:55",
+            "durationNote": "40 minutos · Auditorio Principal",
+            "title": "Arquitecturas Cloud & Agentes de IA con Google Cloud",
+            "speaker": "Lucía Subatin",
+            "affiliation": "Google",
+            "badge": "Google",
+            "badgeColor": "blue",
+            "avatar": "lucia",
+            "roomLabel": "AUDITORIO",
+            "description": "Sesión en el Auditorio Principal guiada por Lucía Subatin (Developer Relations Engineer en Google). Aprende cómo diseñar, conectar y desplegar soluciones modernas en la nube integrando flujos de datos y agentes inteligentes.",
+            "tags": ["Google Cloud", "Agentes IA", "Arquitectura", "Cloud"],
+            "techLogos": ["cloud", "ai"]
+          }
+        ],
+        "sala1": [
+          {
+            "id": "t1-sala1-1",
+            "type": "workshop",
+            "formatLabel": "TALLER / ESPECIALIDAD",
+            "startTime": "09:30",
+            "endTime": "11:00",
+            "durationNote": "90 minutos · Taller / charla de especialidad",
+            "title": "Taller / charla de especialidad: Soluciones Escalables de Datos e IA en Google Cloud",
+            "speaker": "Ranse Vidal",
+            "affiliation": "GDE Google Cloud",
+            "badge": "GDE Google Cloud",
+            "badgeColor": "red",
+            "avatar": "ranse",
+            "roomLabel": "SALA 1",
+            "description": "Taller / charla de especialidad de 90 minutos guiado por Ranse Vidal (Google Developer Expert en Google Cloud). Explora de forma práctica cómo estructurar flujos modernos de ingeniería, integración de servicios en Google Cloud Platform y herramientas de IA.",
+            "tags": ["GDE Google Cloud", "Cloud", "Datos & IA", "Especialidad"],
+            "techLogos": ["cloud", "firebase", "ai"]
+          }
+        ],
+        "sala2": [
+          {
+            "id": "t1-sala2-1",
+            "type": "workshop",
+            "formatLabel": "TALLER / ESPECIALIDAD",
+            "startTime": "09:30",
+            "endTime": "11:00",
+            "durationNote": "90 minutos · Taller / charla de especialidad",
+            "title": "Taller / charla de especialidad: Desarrollo Web Moderno y Escalable con Angular",
+            "speaker": "Álvaro Camillo",
+            "affiliation": "GDE Angular",
+            "badge": "GDE Angular",
+            "badgeColor": "yellow",
+            "avatar": "alvaro",
+            "roomLabel": "SALA 2",
+            "description": "Taller / charla de especialidad de 90 minutos liderado por Álvaro Camillo (Google Developer Expert en Angular). Una inmersión práctica en patrones modernos de ingeniería frontend, desarrollo web con Angular y buenas prácticas de arquitectura.",
+            "tags": ["GDE Angular", "Angular", "Web", "Frontend"],
+            "techLogos": ["angular", "web"]
+          }
+        ],
+        "sala3": [
+          {
+            "id": "t1-sala3-1",
+            "type": "workshop",
+            "formatLabel": "TALLER / ESPECIALIDAD",
+            "startTime": "09:30",
+            "endTime": "11:00",
+            "durationNote": "90 minutos · Taller / charla de especialidad",
+            "title": "Taller / charla de especialidad: De la idea al prototipo móvil construyendo apps con IA",
+            "speaker": "Armando Picón",
+            "affiliation": "GDG Santiago de Chile",
+            "badge": "GDG Santiago de Chile",
+            "badgeColor": "green",
+            "avatar": "devpicon",
+            "roomLabel": "SALA 3",
+            "sessionizeUrl": "https://sessionize.com/s/devpicon/de-la-idea-al-prototipo-movil-construyendo-apps-co/191187",
+            "description": "Taller / charla de especialidad de 90 minutos junto a Armando Picón (GDG Santiago de Chile). Exploraremos un flujo de trabajo práctico para utilizar la IA durante el prototipado de una aplicación móvil, desde las primeras ideas hasta verla funcionando en un dispositivo, compartiendo herramientas, consejos y lecciones aprendidas.",
+            "tags": ["GDG Santiago", "Mobile", "Android", "Kotlin", "IA Generativa"],
+            "techLogos": ["android", "kotlin", "ai"]
+          }
+        ]
+      }
+    },
+    {
+      "id": "pausa-comun",
+      "kind": "plenary",
+      "type": "break",
+      "startTime": "11:00",
+      "endTime": "11:20",
+      "title": "Pausa común y cambio de talleres / charlas de especialidad",
+      "subtitle": "20 minutos para recargar energías, compartir en comunidad y cambiar de sala",
+      "speaker": "Comunidad GDG Santiago & Asistentes",
+      "affiliation": "Break & Networking",
+      "badge": "PAUSA 20 MIN",
+      "avatar": "panel",
+      "roomLabel": "TODAS LAS ÁREAS",
+      "description": "Pausa común de 11:00 a 11:20 hrs y cambio de talleres / charlas de especialidad entre la primera y la segunda tanda.",
+      "tags": ["Pausa Común", "Networking", "Cambio de Sala"],
+      "techLogos": ["community"]
+    },
+    {
+      "id": "tanda-2",
+      "kind": "tanda",
+      "name": "SEGUNDA TANDA",
+      "subtitle": "11:20 – 12:50 · Auditorio y tres salas con talleres / charlas de especialidad simultáneos",
+      "startTime": "11:20",
+      "endTime": "12:50",
+      "note": "Talleres / charlas de especialidad de 90 minutos. A las 12:50 preparación del conversatorio de cierre.",
+      "tracks": {
+        "auditorio": [
+          {
+            "id": "t2-aud-1",
+            "type": "talk",
+            "formatLabel": "CHARLA",
+            "startTime": "11:20",
+            "endTime": "12:00",
+            "durationNote": "40 minutos · Auditorio Principal",
+            "title": "Construyendo con Machine Learning, LLMs y Gemini",
+            "speaker": "Lesly Zerna",
+            "affiliation": "GDE Machine Learning",
+            "badge": "GDE",
+            "badgeColor": "blue",
+            "avatar": "lesly",
+            "roomLabel": "AUDITORIO",
+            "description": "Sesión en el Auditorio Principal junto a Lesly Zerna (Google Developer Expert en Machine Learning). Exploraremos cómo experimentar con modelos generativos, ingeniería de prompts, herramientas de IA de Google y creación de prototipos inteligentes.",
+            "tags": ["Machine Learning", "Gemini", "IA Generativa", "GDE"],
+            "techLogos": ["ai", "cloud", "firebase"]
+          },
+          {
+            "id": "t2-aud-2",
+            "type": "talk",
+            "formatLabel": "CHARLA",
+            "startTime": "12:05",
+            "endTime": "12:45",
+            "durationNote": "40 minutos · Auditorio Principal",
+            "title": "Observabilidad Moderna y Rendimiento en Sistemas Cloud-Native",
+            "speaker": "Eduardo Miranda",
+            "affiliation": "Datadog",
+            "badge": "Datadog",
+            "badgeColor": "blue",
+            "avatar": "eduardo",
+            "roomLabel": "AUDITORIO",
+            "description": "Sesión técnica en el Auditorio Principal con Eduardo Miranda (Datadog). Analizaremos cómo monitorear, entender y optimizar aplicaciones modernas distribuidas y servicios potenciados por IA en producción sin perder visibilidad de extremo a extremo.",
+            "tags": ["Observabilidad", "Datadog", "Cloud Native", "DevOps & SRE"],
+            "techLogos": ["datadog", "cloud"]
+          }
+        ],
+        "sala1": [
+          {
+            "id": "t2-sala1-1",
+            "type": "workshop",
+            "formatLabel": "TALLER / ESPECIALIDAD",
+            "startTime": "11:20",
+            "endTime": "12:50",
+            "durationNote": "90 minutos · Taller / charla de especialidad",
+            "title": "Taller / charla de especialidad: Orquestación de Agentes e IA en Google Cloud",
+            "speaker": "Julio Quinteros",
+            "affiliation": "GDE Google Cloud",
+            "badge": "GDE Google Cloud",
+            "badgeColor": "red",
+            "avatar": "julio",
+            "roomLabel": "SALA 1",
+            "description": "Taller / charla de especialidad de 90 minutos dirigido por Julio Quinteros (Google Developer Expert en Google Cloud). Aprenderemos a construir y desplegar arquitecturas en Google Cloud Platform integrando servicios de IA generativa, Vertex AI y agentes automatizados.",
+            "tags": ["GDE Google Cloud", "Vertex AI", "Agentes IA", "Arquitectura"],
+            "techLogos": ["cloud", "ai"]
+          }
+        ],
+        "sala2": [
+          {
+            "id": "t2-sala2-1",
+            "type": "workshop",
+            "formatLabel": "TALLER / ESPECIALIDAD",
+            "startTime": "11:20",
+            "endTime": "12:50",
+            "durationNote": "90 minutos · Taller / charla de especialidad",
+            "title": "Taller / charla de especialidad: Arquitectura Frontend Moderna con Angular",
+            "speaker": "Jimmy Dolores",
+            "affiliation": "GDE Angular",
+            "badge": "GDE Angular",
+            "badgeColor": "yellow",
+            "avatar": "jimmy",
+            "roomLabel": "SALA 2",
+            "description": "Taller / charla de especialidad de 90 minutos junto a Jimmy Dolores (Google Developer Expert en Angular). Descubre las últimas capacidades de Angular para construir aplicaciones web reactivas, modulares y de alto rendimiento.",
+            "tags": ["GDE Angular", "Angular", "Frontend", "TypeScript"],
+            "techLogos": ["angular", "web"]
+          }
+        ],
+        "sala3": [
+          {
+            "id": "t2-sala3-1",
+            "type": "workshop",
+            "formatLabel": "TALLER / ESPECIALIDAD",
+            "startTime": "11:20",
+            "endTime": "12:50",
+            "durationNote": "90 minutos · Taller / charla de especialidad",
+            "title": "Taller / charla de especialidad: Desarrollo y Soluciones Tecnológicas en Acción",
+            "speaker": "Nicolás Lecaros",
+            "affiliation": "GDG Santiago de Chile",
+            "badge": "GDG Santiago de Chile",
+            "badgeColor": "green",
+            "avatar": "nicolas",
+            "roomLabel": "SALA 3",
+            "description": "Taller / charla de especialidad de 90 minutos guiado por Nicolás Lecaros (GDG Santiago de Chile). Sesión práctica enfocada en desarrollo moderno, buenas prácticas de ingeniería y herramientas del ecosistema tecnológico.",
+            "tags": ["GDG Santiago", "Especialidad", "Desarrollo", "Comunidad"],
+            "techLogos": ["cloud", "ai", "web"]
+          }
+        ]
+      }
+    },
+    {
+      "id": "preparacion-conversatorio",
+      "kind": "plenary",
+      "type": "break",
+      "startTime": "12:50",
+      "endTime": "13:00",
+      "title": "Preparación del conversatorio",
+      "subtitle": "10 minutos de transición hacia el auditorio principal y conexión de retransmisión en salas",
+      "speaker": "Equipo Organizador GDG Santiago & UNAB",
+      "affiliation": "Transición al Cierre",
+      "badge": "10 MIN",
+      "avatar": "panel",
+      "roomLabel": "AUDITORIO + SALAS 1, 2 Y 3",
+      "description": "Bloque de preparación del conversatorio de cierre (12:50 a 13:00 hrs) en el auditorio principal con retransmisión simultánea en las tres salas.",
+      "tags": ["Preparación", "Transición", "Auditorio"],
+      "techLogos": ["community"]
+    },
+    {
+      "id": "conversatorio-cierre",
+      "kind": "plenary",
+      "type": "panel",
+      "startTime": "13:00",
+      "endTime": "14:00",
+      "title": "Conversatorio de cierre en el auditorio principal",
+      "subtitle": "Andrés Peralta (Banco BICE), Rocío Contreras (UNAB) y Pedro Aguirre (Camanchaca)",
+      "speaker": "Andrés Peralta (Banco BICE) · Rocío Contreras (UNAB) · Pedro Aguirre (Camanchaca)",
+      "affiliation": "Banco BICE · UNAB · Camanchaca · Retransmisión en salas",
+      "badge": "CONVERSATORIO DE CIERRE",
+      "avatar": "panel",
+      "roomLabel": "AUDITORIO + RETRANSMISIÓN EN SALAS",
+      "description": "Conversatorio de cierre en el auditorio principal (con retransmisión en las tres salas) junto a Andrés Peralta (Banco BICE), Rocío Contreras (Universidad Andrés Bello) y Pedro Aguirre (Camanchaca). Un espacio de diálogo sobre adopción de IA, talento, desafíos tecnológicos en la industria y la academia, y cierre oficial de la jornada del DevFest Santiago 2026.",
+      "tags": ["Conversatorio de Cierre", "Banco BICE", "UNAB", "Camanchaca", "Industria & Academia"],
+      "techLogos": ["community", "ai", "cloud"]
+    }
+  ]
+}

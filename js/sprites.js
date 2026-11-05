@@ -516,7 +516,59 @@ const KUNIO_TEMPLATES = {
     ]
   },
 
-  // 10. Panel / Comunidad / Apertura - Chaqueta multicolor GDG en vista 3/4
+  // 10. Nicolás Lecaros (GDG Santiago de Chile) - Cabello castaño corto, chaqueta verde GDG con polera azul/blanca
+  'nicolas': {
+    frame1: [
+      "....................",
+      ".....KKKKKKKKKK.....",
+      "....KCCCCCCCCCCK....",
+      "....KCCCCCCCCCCK....",
+      "....KCCCCSSCCCCK....",
+      "....KCCCSSSSSSSK....",
+      "....KCCCSSSSSSSK....",
+      "....KSSCSKSSSKSK....",
+      "....KSSSSKSSSKSK....",
+      "....KKSSSSKKKSSK....",
+      ".....KKSSSSSSSSK....",
+      "......KKKKKKKKK.....",
+      "....KKVVVVBBBBVVKK..",
+      "...KVVKVVVBBBBVVKVK.",
+      "...KVVKVVVWWWWVVKVK.",
+      "...KSSKVVVVVVVVKSSK.",
+      "...KKKKDDDDDDDDKKKK.",
+      ".....KDDDDDDDDK.....",
+      ".....KDDDDKDDDK.....",
+      ".....KVVVVKVVVVK....",
+      ".....KKKKKKKKKKK....",
+      "...................."
+    ],
+    frame2: [
+      "....................",
+      ".....KKKKKKKKKK.....",
+      "....KCCCCCCCCCCK....",
+      "....KCCCCCCCCCCK....",
+      "....KCCCCSSCCCCK....",
+      "....KCCCSSSSSSSK....",
+      "....KCCCSSSSSSSK....",
+      "....KSSCSKSSSKSK....",
+      "....KSSSSKSSSKSK....",
+      "....KKSSSSKKKSSK....",
+      ".....KKSSSKKKSSK....",
+      "......KKKKKKKKK.....",
+      "..KKKKVVVVBBBBKKKK..",
+      ".KSSVVVVVVBBBBVVSSK.",
+      ".KSSVVVVVVWWWWVVSSK.",
+      "..KKKKVVVVVVVVKKKK..",
+      ".....KDDDDDDDDK.....",
+      ".....KDDDDDDDDK.....",
+      ".....KDDDDKDDDK.....",
+      ".....KVVVVKVVVVK....",
+      ".....KKKKKKKKKKK....",
+      "...................."
+    ]
+  },
+
+  // 11. Panel / Comunidad / Apertura - Chaqueta multicolor GDG en vista 3/4
   'panel': {
     frame1: [
       "....................",

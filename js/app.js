@@ -5,8 +5,21 @@ import { renderKunioCharacter, renderTechBadge } from './sprites.js';
 const state = {
   activeRoomFilter: 'all', // 'all' | 'auditorio' | 'sala1' | 'sala2' | 'sala3'
   simulateAsymmetric: false, // Permite previsualizar cómo se comporta la grilla cuando un taller dura menos
+  agendaData: null, // Datos cargados desde data/agenda.json
   blocksIndex: new Map() // Mapa id -> datos del bloque para abrir el modal
 };
+
+/**
+ * Carga el programa / agenda desde el archivo externo JSON (`data/agenda.json`)
+ */
+async function loadAgendaJson() {
+  const agendaUrl = EVENT_DATA.meta?.agendaJsonPath || 'data/agenda.json';
+  const response = await fetch(agendaUrl, { cache: 'no-store' });
+  if (!response.ok) {
+    throw new Error(`No se pudo cargar ${agendaUrl} (HTTP ${response.status})`);
+  }
+  return response.json();
+}
 
 /**
  * Convierte "HH:MM" a minutos desde las 00:00
@@ -47,7 +60,7 @@ function buildTrackTimeline(rawBlocks, tandaStartStr, tandaEndStr, room, schedul
     if (bStart > cursor) {
       const gapMins = bStart - cursor;
       if (gapMins >= scheduleConfig.minGapMinutesToFill && scheduleConfig.autoFillGaps) {
-        timeline.push(createAutoFillerBlock(cursor, bStart, room, `${room.id}-gap-${idx}`));
+        timeline.push(createAutoFillerBlock(cursor, bStart, room, `${room.id}-gap-${idx}`, scheduleConfig));
       } else {
         timeline.push({
           id: `${room.id}-trans-${idx}`,
@@ -68,11 +81,11 @@ function buildTrackTimeline(rawBlocks, tandaStartStr, tandaEndStr, room, schedul
     cursor = Math.max(cursor, bEnd);
   });
 
-  // ¿Queda tiempo libre al final de la tanda en esta sala? (Ej: un taller que dura 90 min en vez de 120 min)
+  // ¿Queda tiempo libre al final de la tanda en esta sala? (Ej: un taller que dura 60 min en vez de 90 min)
   if (cursor < tandaEnd) {
     const remainingMins = tandaEnd - cursor;
     if (remainingMins >= scheduleConfig.minGapMinutesToFill && scheduleConfig.autoFillGaps) {
-      timeline.push(createAutoFillerBlock(cursor, tandaEnd, room, `${room.id}-end-filler`));
+      timeline.push(createAutoFillerBlock(cursor, tandaEnd, room, `${room.id}-end-filler`, scheduleConfig));
     } else {
       timeline.push({
         id: `${room.id}-trans-end`,
@@ -88,7 +101,7 @@ function buildTrackTimeline(rawBlocks, tandaStartStr, tandaEndStr, room, schedul
   return timeline;
 }
 
-function createAutoFillerBlock(startMins, endMins, room, id) {
+function createAutoFillerBlock(startMins, endMins, room, id, scheduleConfig) {
   const durationMinutes = endMins - startMins;
   const startTime = minutesToTime(startMins);
   const endTime = minutesToTime(endMins);
@@ -100,59 +113,68 @@ function createAutoFillerBlock(startMins, endMins, room, id) {
     endTime,
     durationMinutes,
     durationNote: `${durationMinutes} minutos disponibles`,
-    title: EVENT_DATA.scheduleConfig.defaultFillerTitle,
+    title: scheduleConfig.defaultFillerTitle,
     speaker: 'Comunidad GDG Santiago & Speakers',
     affiliation: 'Dinámica Abierta',
     badge: 'FLEXIBLE',
     badgeColor: room.color,
     avatar: 'panel',
     roomLabel: room.name,
-    description: EVENT_DATA.scheduleConfig.defaultFillerDescription,
+    description: scheduleConfig.defaultFillerDescription,
     tags: ['Q&A Extendido', 'Networking', 'Bloque Flexible'],
     techLogos: ['community', 'ai']
   };
 }
 
 /**
- * Clona los datos de las tandas y, si el modo de demostración asimétrica está activo,
- * acorta un par de talleres para mostrar cómo se adapta el layout con bloques de relleno.
+ * Clona los bloques del programa y, si el modo de demostración asimétrica está activo,
+ * acorta un par de talleres de 90 min a 60 min para mostrar cómo se adapta el layout con bloques de relleno.
  */
-function getEffectiveTandas() {
-  const cloned = JSON.parse(JSON.stringify(EVENT_DATA.schedule.tandas));
-  if (!state.simulateAsymmetric) {
-    return cloned;
+function getEffectiveBlocks() {
+  if (!state.agendaData || !Array.isArray(state.agendaData.blocks)) {
+    return [];
   }
 
-  // En modo simulación:
-  // 1) En Tanda 1, Sala 1 (Lucía Subatin) dura 90 min (09:15–10:45) + 30 min de bloque de relleno (10:45–11:15)
-  const t1Sala1 = cloned[0].tracks.sala1[0];
-  t1Sala1.endTime = '10:45';
-  t1Sala1.durationNote = '90 minutos (Ajustado) · Preguntas incluidas';
-  cloned[0].tracks.sala1.push({
-    id: 't1-sala1-filler-demo',
-    type: 'filler',
-    formatLabel: 'BLOQUE DE RELLENO',
-    startTime: '10:45',
-    endTime: '11:15',
-    durationNote: '30 minutos · Actividad complementaria',
-    title: 'Clinic de Código & Q&A Abierto de Cloud',
-    speaker: 'Mentores GDG Santiago',
-    affiliation: 'Bloque de Relleno',
-    badge: '30 MIN EXTRA',
-    badgeColor: 'red',
-    avatar: 'panel',
-    roomLabel: 'SALA 1',
-    description: 'Ejemplo de bloque de relleno (30 min) agregado cuando un taller finaliza a las 10:45 en lugar de las 11:15. El programa ajusta proporcionalmente la altura de cada bloque sin asumir simetría fija.',
-    tags: ['Bloque de Relleno', 'Q&A', 'Networking'],
-    techLogos: ['cloud', 'community']
-  });
+  const clonedBlocks = JSON.parse(JSON.stringify(state.agendaData.blocks));
+  if (!state.simulateAsymmetric) {
+    return clonedBlocks;
+  }
 
-  // 2) En Tanda 2, Sala 2 (Ranse Vidal) termina a las 13:05 (90 min) y el motor auto-rellena 13:05–13:35
-  const t2Sala2 = cloned[1].tracks.sala2[0];
-  t2Sala2.endTime = '13:05';
-  t2Sala2.durationNote = '90 minutos (Ajustado) · Auto-relleno activo';
+  const tandas = clonedBlocks.filter(b => b.kind === 'tanda');
 
-  return cloned;
+  // 1) En Tanda 1 (09:30–11:00), Sala 1 dura 60 min (09:30–10:30) + 30 min de bloque de relleno manual (10:30–11:00)
+  if (tandas[0]?.tracks?.sala1?.[0]) {
+    const t1Sala1 = tandas[0].tracks.sala1[0];
+    t1Sala1.endTime = '10:30';
+    t1Sala1.durationNote = '60 minutos (Ajustado) · Taller / charla de especialidad';
+    tandas[0].tracks.sala1.push({
+      id: 't1-sala1-filler-demo',
+      type: 'filler',
+      formatLabel: 'BLOQUE DE RELLENO',
+      startTime: '10:30',
+      endTime: '11:00',
+      durationNote: '30 minutos · Actividad complementaria',
+      title: 'Clinic de Código & Q&A Abierto de Cloud',
+      speaker: 'Mentores GDG Santiago',
+      affiliation: 'Bloque de Relleno',
+      badge: '30 MIN EXTRA',
+      badgeColor: 'red',
+      avatar: 'panel',
+      roomLabel: 'SALA 1',
+      description: 'Ejemplo de bloque de relleno (30 min) agregado cuando un taller finaliza a las 10:30 en lugar de las 11:00. El programa ajusta proporcionalmente la altura de cada bloque desde data/agenda.json.',
+      tags: ['Bloque de Relleno', 'Q&A', 'Networking'],
+      techLogos: ['cloud', 'community']
+    });
+  }
+
+  // 2) En Tanda 2 (11:20–12:50), Sala 2 termina a las 12:20 (60 min) y el motor auto-rellena 12:20–12:50
+  if (tandas[1]?.tracks?.sala2?.[0]) {
+    const t2Sala2 = tandas[1].tracks.sala2[0];
+    t2Sala2.endTime = '12:20';
+    t2Sala2.durationNote = '60 minutos (Ajustado) · Auto-relleno activo';
+  }
+
+  return clonedBlocks;
 }
 
 /**
@@ -171,6 +193,51 @@ function initMarquee() {
 }
 
 /**
+ * Extrae la lista única de speakers de las tandas en `data/agenda.json`
+ * para mostrar sus avatares 8-bit en el escenario del Hero.
+ */
+function extractSpeakersFromAgenda(agendaData) {
+  const defaultCast = [
+    { key: 'mikaeri', name: 'Mikaeri', badge: 'Google' },
+    { key: 'lucia', name: 'Lucía', badge: 'Google' },
+    { key: 'ranse', name: 'Ranse', badge: 'GDE Cloud' },
+    { key: 'alvaro', name: 'Álvaro', badge: 'GDE Angular' },
+    { key: 'devpicon', name: 'Armando', badge: 'GDG Santiago' },
+    { key: 'lesly', name: 'Lesly', badge: 'GDE' },
+    { key: 'eduardo', name: 'Eduardo', badge: 'Datadog' },
+    { key: 'julio', name: 'Julio', badge: 'GDE Cloud' },
+    { key: 'jimmy', name: 'Jimmy', badge: 'GDE Angular' },
+    { key: 'nicolas', name: 'Nicolás', badge: 'GDG Santiago' }
+  ];
+
+  if (!agendaData || !Array.isArray(agendaData.blocks)) {
+    return defaultCast;
+  }
+
+  const seenAvatars = new Set();
+  const extracted = [];
+
+  agendaData.blocks.forEach(block => {
+    if (block.kind !== 'tanda' || !block.tracks) return;
+    Object.values(block.tracks).forEach(trackSessions => {
+      trackSessions.forEach(session => {
+        if (!session.avatar || session.avatar === 'panel' || seenAvatars.has(session.avatar)) return;
+        seenAvatars.add(session.avatar);
+        const firstName = session.speaker.split(' ')[0];
+        extracted.push({
+          key: session.avatar,
+          name: firstName,
+          fullName: session.speaker,
+          badge: session.affiliation || session.badge || ''
+        });
+      });
+    });
+  });
+
+  return extracted.length > 0 ? extracted : defaultCast;
+}
+
+/**
  * Renderiza la barra de badges tecnológicos en 8-bits y los personajes Kunio-kun del Hero
  */
 function initHeroSprites() {
@@ -183,22 +250,12 @@ function initHeroSprites() {
 
   const kunioParade = document.getElementById('hero-kunio-parade');
   if (kunioParade) {
-    const cast = [
-      { key: 'mikaeri', name: 'Mikaeri', badge: 'Google' },
-      { key: 'devpicon', name: 'Armando', badge: 'GDE/GDG' },
-      { key: 'lucia', name: 'Lucía', badge: 'Google' },
-      { key: 'alvaro', name: 'Álvaro', badge: 'GDE' },
-      { key: 'lesly', name: 'Lesly', badge: 'GDE' },
-      { key: 'eduardo', name: 'Eduardo', badge: 'Datadog' },
-      { key: 'julio', name: 'Julio', badge: 'GDE' },
-      { key: 'ranse', name: 'Ranse', badge: 'GDE' },
-      { key: 'jimmy', name: 'Jimmy', badge: 'GDE' }
-    ];
+    const cast = extractSpeakersFromAgenda(state.agendaData);
 
     kunioParade.innerHTML = cast
       .map(
         char => `
-        <div class="kunio-stage-card" title="${char.name} (${char.badge})">
+        <div class="kunio-stage-card" title="${char.fullName || char.name} (${char.badge})">
           ${renderKunioCharacter(char.key, 'kunio-sm')}
           <span class="kunio-stage-name">${char.name}</span>
         </div>
@@ -209,7 +266,7 @@ function initHeroSprites() {
 }
 
 /**
- * Renderiza un bloque plenario (Apertura, Pausa común o Cierre)
+ * Renderiza un bloque plenario (Bienvenida UNAB, Bienvenida GDG, Pausa común, Preparación o Conversatorio de cierre)
  */
 function renderPlenaryCard(block) {
   const startMins = timeToMinutes(block.startTime);
@@ -319,6 +376,7 @@ function renderTrackBlockCard(block, room) {
           </div>
           <div class="block-speaker-meta">
             ${formatSpeakerDisplay(block.speaker)}
+            ${block.affiliation ? `<p class="block-moderators">${block.affiliation}</p>` : ''}
             ${block.moderators ? `<p class="block-moderators">${block.moderators}</p>` : ''}
             <p class="block-duration-note">${block.durationNote || `${block.durationMinutes} minutos`}</p>
           </div>
@@ -343,10 +401,10 @@ function renderTrackBlockCard(block, room) {
 /**
  * Renderiza una Tanda completa con sus 4 columnas de Salas proporcionales al tiempo
  */
-function renderTandaSection(tanda) {
+function renderTandaSection(tanda, rooms, scheduleConfig) {
   const totalTandaMins = timeToMinutes(tanda.endTime) - timeToMinutes(tanda.startTime);
 
-  const visibleRooms = EVENT_DATA.rooms.filter(
+  const visibleRooms = rooms.filter(
     r => state.activeRoomFilter === 'all' || state.activeRoomFilter === r.id
   );
 
@@ -358,7 +416,7 @@ function renderTandaSection(tanda) {
         tanda.startTime,
         tanda.endTime,
         room,
-        EVENT_DATA.scheduleConfig
+        scheduleConfig
       );
 
       const cardsHtml = timeline.map(b => renderTrackBlockCard(b, room)).join('');
@@ -395,34 +453,53 @@ function renderTandaSection(tanda) {
         </div>
       </div>
 
-      <p class="tanda-footnote">ℹ️ ${tanda.note}</p>
+      ${tanda.note ? `<p class="tanda-footnote">ℹ️ ${tanda.note}</p>` : ''}
     </section>
   `;
 }
 
 /**
- * Renderiza toda la Agenda
+ * Renderiza toda la Agenda cargada desde `data/agenda.json`
  */
 function renderFullSchedule() {
   const container = document.getElementById('schedule-root');
-  if (!container) return;
+  if (!container || !state.agendaData) return;
 
   state.blocksIndex.clear();
-  const effectiveTandas = getEffectiveTandas();
+  const rooms = state.agendaData.rooms || [];
+  const scheduleConfig = state.agendaData.scheduleConfig || {
+    autoFillGaps: true,
+    minGapMinutesToFill: 10,
+    defaultFillerTitle: 'Bloque Flexible · Q&A Libre / Demos / Networking',
+    defaultFillerDescription: 'Espacio flexible para preguntas extendidas o networking.'
+  };
 
-  const openingHtml = renderPlenaryCard(EVENT_DATA.schedule.opening);
-  const tanda1Html = renderTandaSection(effectiveTandas[0]);
-  const breakHtml = renderPlenaryCard(EVENT_DATA.schedule.commonBreak);
-  const tanda2Html = renderTandaSection(effectiveTandas[1]);
-  const closingHtml = renderPlenaryCard(EVENT_DATA.schedule.closing);
+  const effectiveBlocks = getEffectiveBlocks();
 
-  container.innerHTML = `
-    ${openingHtml}
-    ${tanda1Html}
-    ${breakHtml}
-    ${tanda2Html}
-    ${closingHtml}
-  `;
+  const blocksHtml = effectiveBlocks
+    .map(block => {
+      if (block.kind === 'tanda') {
+        return renderTandaSection(block, rooms, scheduleConfig);
+      }
+      return renderPlenaryCard(block);
+    })
+    .join('');
+
+  const footerMetaHtml =
+    state.agendaData.footerNote || state.agendaData.lastUpdated
+      ? `
+      <div class="schedule-meta-footer">
+        ${state.agendaData.footerNote ? `<p>ℹ️ <strong>${state.agendaData.footerNote}</strong></p>` : ''}
+        ${
+          state.agendaData.lastUpdated
+            ? `<p>📅 Versión actualizada: <strong>${state.agendaData.lastUpdated}</strong> · Fuente editable: <code>data/agenda.json</code></p>`
+            : ''
+        }
+      </div>
+    `
+      : '';
+
+  container.innerHTML = `${blocksHtml}${footerMetaHtml}`;
 
   // Asignar eventos de clic y teclado a cada bloque del programa
   container.querySelectorAll('[data-block-id]').forEach(el => {
@@ -640,10 +717,28 @@ function initSponsorsRender() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initMarquee();
-  initHeroSprites();
-  renderFullSchedule();
   initScheduleControls();
   initSponsorsRender();
+
+  try {
+    state.agendaData = await loadAgendaJson();
+  } catch (err) {
+    console.error('Error cargando data/agenda.json:', err);
+    const container = document.getElementById('schedule-root');
+    if (container) {
+      container.innerHTML = `
+        <div class="plenary-card plenary-break">
+          <div class="plenary-info-col">
+            <h3 class="plenary-title">⚠️ No se pudo cargar el archivo data/agenda.json</h3>
+            <p class="plenary-subtitle">Verifica que el sitio se esté sirviendo mediante un servidor HTTP y que data/agenda.json tenga un formato JSON válido.</p>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  initHeroSprites();
+  renderFullSchedule();
 });
