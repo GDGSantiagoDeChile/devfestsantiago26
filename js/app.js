@@ -4,7 +4,6 @@ import { renderKunioCharacter, renderTechBadge } from './sprites.js';
 // Estado de la aplicación
 const state = {
   activeRoomFilter: 'all', // 'all' | 'auditorio' | 'sala1' | 'sala2' | 'sala3'
-  simulateAsymmetric: false, // Permite previsualizar cómo se comporta la grilla cuando un taller dura menos
   agendaData: null, // Datos cargados desde data/agenda.json
   blocksIndex: new Map() // Mapa id -> datos del bloque para abrir el modal
 };
@@ -127,54 +126,13 @@ function createAutoFillerBlock(startMins, endMins, room, id, scheduleConfig) {
 }
 
 /**
- * Clona los bloques del programa y, si el modo de demostración asimétrica está activo,
- * acorta un par de talleres de 90 min a 60 min para mostrar cómo se adapta el layout con bloques de relleno.
+ * Retorna una copia de los bloques del programa cargados desde data/agenda.json
  */
 function getEffectiveBlocks() {
   if (!state.agendaData || !Array.isArray(state.agendaData.blocks)) {
     return [];
   }
-
-  const clonedBlocks = JSON.parse(JSON.stringify(state.agendaData.blocks));
-  if (!state.simulateAsymmetric) {
-    return clonedBlocks;
-  }
-
-  const tandas = clonedBlocks.filter(b => b.kind === 'tanda');
-
-  // 1) En Tanda 1 (09:30–11:00), Sala 1 dura 60 min (09:30–10:30) + 30 min de bloque de relleno manual (10:30–11:00)
-  if (tandas[0]?.tracks?.sala1?.[0]) {
-    const t1Sala1 = tandas[0].tracks.sala1[0];
-    t1Sala1.endTime = '10:30';
-    t1Sala1.durationNote = '60 minutos (Ajustado) · Taller / charla de especialidad';
-    tandas[0].tracks.sala1.push({
-      id: 't1-sala1-filler-demo',
-      type: 'filler',
-      formatLabel: 'BLOQUE DE RELLENO',
-      startTime: '10:30',
-      endTime: '11:00',
-      durationNote: '30 minutos · Actividad complementaria',
-      title: 'Clinic de Código & Q&A Abierto de Cloud',
-      speaker: 'Mentores GDG Santiago',
-      affiliation: 'Bloque de Relleno',
-      badge: '30 MIN EXTRA',
-      badgeColor: 'red',
-      avatar: 'panel',
-      roomLabel: 'SALA 1',
-      description: 'Ejemplo de bloque de relleno (30 min) agregado cuando un taller finaliza a las 10:30 en lugar de las 11:00. El programa ajusta proporcionalmente la altura de cada bloque desde data/agenda.json.',
-      tags: ['Bloque de Relleno', 'Q&A', 'Networking'],
-      techLogos: ['cloud', 'community']
-    });
-  }
-
-  // 2) En Tanda 2 (11:20–12:50), Sala 2 termina a las 12:20 (60 min) y el motor auto-rellena 12:20–12:50
-  if (tandas[1]?.tracks?.sala2?.[0]) {
-    const t2Sala2 = tandas[1].tracks.sala2[0];
-    t2Sala2.endTime = '12:20';
-    t2Sala2.durationNote = '60 minutos (Ajustado) · Auto-relleno activo';
-  }
-
-  return clonedBlocks;
+  return JSON.parse(JSON.stringify(state.agendaData.blocks));
 }
 
 /**
@@ -485,21 +443,7 @@ function renderFullSchedule() {
     })
     .join('');
 
-  const footerMetaHtml =
-    state.agendaData.footerNote || state.agendaData.lastUpdated
-      ? `
-      <div class="schedule-meta-footer">
-        ${state.agendaData.footerNote ? `<p>ℹ️ <strong>${state.agendaData.footerNote}</strong></p>` : ''}
-        ${
-          state.agendaData.lastUpdated
-            ? `<p>📅 Versión actualizada: <strong>${state.agendaData.lastUpdated}</strong> · Fuente editable: <code>data/agenda.json</code></p>`
-            : ''
-        }
-      </div>
-    `
-      : '';
-
-  container.innerHTML = `${blocksHtml}${footerMetaHtml}`;
+  container.innerHTML = blocksHtml;
 
   // Asignar eventos de clic y teclado a cada bloque del programa
   container.querySelectorAll('[data-block-id]').forEach(el => {
@@ -604,7 +548,7 @@ function closeSessionModal() {
 }
 
 /**
- * Inicializa filtros de salas y el simulador de bloques asimétricos
+ * Inicializa filtros de salas y controles del modal
  */
 function initScheduleControls() {
   const filterBtns = document.querySelectorAll('[data-room-filter]');
@@ -616,18 +560,6 @@ function initScheduleControls() {
       renderFullSchedule();
     });
   });
-
-  const asymmetricToggle = document.getElementById('toggle-asymmetric-demo');
-  if (asymmetricToggle) {
-    asymmetricToggle.addEventListener('click', () => {
-      state.simulateAsymmetric = !state.simulateAsymmetric;
-      asymmetricToggle.classList.toggle('is-active', state.simulateAsymmetric);
-      asymmetricToggle.innerHTML = state.simulateAsymmetric
-        ? '⚡ MODO ASIMÉTRICO ACTIVO (VER HORARIO ORIGINAL)'
-        : '🛠️ PROBAR TALLER CORTO + BLOQUE DE RELLENO';
-      renderFullSchedule();
-    });
-  }
 
   // Cierre de modal
   const closeBtn = document.getElementById('modal-close-btn');
