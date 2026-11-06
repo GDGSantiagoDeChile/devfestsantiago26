@@ -564,8 +564,8 @@ body {
 
 .kunio-parade-stage {
   display: grid;
-  grid-template-columns: repeat(9, minmax(0, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px 6px;
   background: linear-gradient(180deg, #1E1E1E 0%, #2D2D2D 78%, #444444 78%, #333333 100%);
   border: 3px solid var(--bw-black);
   padding: 12px 8px 8px;
@@ -577,6 +577,33 @@ body {
   align-items: center;
   gap: 4px;
   min-width: 0;
+  background: transparent;
+  border: 2px solid transparent;
+  padding: 4px 2px;
+  cursor: pointer;
+  color: inherit;
+  transition: transform 0.1s steps(2), background-color 0.1s, border-color 0.1s;
+}
+
+.kunio-stage-card:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: var(--gdg-yellow);
+  transform: translateY(-2px);
+}
+
+.kunio-stage-visual {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-right: 10px;
+}
+
+.kunio-stage-visual .speaker-photo-circle {
+  position: absolute;
+  right: -4px;
+  bottom: -2px;
+  z-index: 2;
 }
 
 .kunio-stage-name {
@@ -588,6 +615,76 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Medallones circulares de foto de speaker (24x24, 32x32, 36x36, 72x72) + Fallback 8-Bit */
+.speaker-photo-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--bw-black);
+  background: radial-gradient(circle at 35% 30%, #3A3F50 0%, #1A1A1A 100%);
+  box-shadow: 2px 2px 0px var(--bw-black);
+  flex-shrink: 0;
+  position: relative;
+  transition: transform 0.12s steps(2), box-shadow 0.12s steps(2);
+}
+
+.circle-accent-blue { outline: 2px solid var(--gdg-blue); }
+.circle-accent-red { outline: 2px solid var(--gdg-red); }
+.circle-accent-yellow { outline: 2px solid var(--gdg-yellow); }
+.circle-accent-green { outline: 2px solid var(--gdg-green); }
+
+.circle-24 { width: 24px; height: 24px; }
+.circle-32 { width: 32px; height: 32px; }
+.circle-36 { width: 36px; height: 36px; }
+.circle-72 {
+  width: 76px;
+  height: 76px;
+  border-width: 3px;
+  box-shadow: 4px 4px 0px var(--bw-black);
+}
+
+.speaker-circle-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  image-rendering: auto;
+}
+
+.speaker-circle-fallback {
+  display: none;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+}
+
+.speaker-photo-circle.is-fallback .speaker-circle-img {
+  display: none;
+}
+
+.speaker-photo-circle.is-fallback .speaker-circle-fallback {
+  display: inline-flex;
+}
+
+.kunio-headshot-wrap {
+  width: 100%;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kunio-headshot-svg {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 /* Animación de sprites estilo Kunio-kun NES (2 frames + caminata) */
@@ -1167,6 +1264,15 @@ body {
   gap: 10px;
 }
 
+.block-avatar-combo {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding-right: 12px;
+  padding-bottom: 4px;
+}
+
 .block-avatar-frame {
   background-color: var(--bw-gray-100);
   border: 2px solid var(--bw-black);
@@ -1174,9 +1280,27 @@ body {
   flex-shrink: 0;
 }
 
+.block-avatar-combo .speaker-photo-circle {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  z-index: 2;
+}
+
+.schedule-block-card:hover .block-avatar-combo .speaker-photo-circle {
+  transform: scale(1.12);
+}
+
 .block-speaker-meta {
   min-width: 0;
   flex: 1;
+}
+
+.speaker-name-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .block-speaker-name {
@@ -1185,6 +1309,17 @@ body {
   color: var(--bw-black);
   line-height: 1.25;
   overflow-wrap: break-word;
+}
+
+.speaker-country-pill {
+  font-family: var(--font-arcade);
+  font-size: 0.65rem;
+  font-weight: 700;
+  background-color: var(--bw-gray-100);
+  color: var(--bw-gray-800);
+  border: 1px solid var(--bw-black);
+  padding: 1px 6px;
+  white-space: nowrap;
 }
 
 .block-panelists-list {
@@ -1229,6 +1364,16 @@ body {
   overflow-wrap: break-word;
 }
 
+.block-talk-excerpt {
+  font-size: 0.82rem;
+  color: var(--bw-gray-700);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .block-card-footer {
   display: flex;
   flex-direction: column;
@@ -1260,22 +1405,41 @@ body {
 
 .block-cta-row {
   display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
   justify-content: flex-end;
 }
 
 .press-start-hint {
   font-family: var(--font-arcade);
   font-weight: 700;
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   color: var(--bw-gray-900);
   background-color: var(--gdg-yellow-soft);
-  padding: 3px 8px;
-  border: 1px solid var(--bw-black);
+  padding: 4px 8px;
+  border: 2px solid var(--bw-black);
+  cursor: pointer;
+  transition: transform 0.08s steps(2), background-color 0.1s;
 }
 
-.schedule-block-card:hover .press-start-hint {
+.btn-card-speaker {
+  background-color: var(--gdg-blue-soft);
+  color: var(--bw-black);
+}
+
+.btn-card-tab:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0 var(--bw-black);
+}
+
+.schedule-block-card:hover .press-start-hint:not(.btn-card-speaker) {
   background-color: var(--gdg-yellow);
   color: var(--bw-black);
+}
+
+.btn-card-speaker:hover {
+  background-color: var(--gdg-blue) !important;
+  color: var(--bw-white) !important;
 }
 
 .tanda-footnote {
@@ -1425,7 +1589,8 @@ body {
 
 .modal-room-chip,
 .modal-time-chip,
-.modal-affiliation-chip {
+.modal-affiliation-chip,
+.modal-country-chip {
   font-family: var(--font-arcade);
   font-size: 0.72rem;
   font-weight: 700;
@@ -1436,6 +1601,157 @@ body {
 .modal-room-chip { background-color: var(--gdg-blue); color: var(--bw-white); }
 .modal-time-chip { background-color: var(--bw-black); color: var(--bw-white); }
 .modal-affiliation-chip { background-color: var(--gdg-yellow); color: var(--bw-black); }
+.modal-country-chip { background-color: var(--bw-white); color: var(--bw-black); }
+
+/* Barra de pestañas en el Modal (Sesión vs Perfil del Speaker) */
+.modal-tabs-bar {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.modal-tab-btn {
+  font-family: var(--font-arcade);
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 10px 12px;
+  background-color: var(--bw-gray-200);
+  color: var(--bw-gray-800);
+  border: 3px solid var(--bw-black);
+  box-shadow: var(--pixel-shadow-sm);
+  cursor: pointer;
+  transition: transform 0.08s steps(2), background-color 0.1s;
+}
+
+.modal-tab-btn:hover {
+  background-color: var(--gdg-yellow-soft);
+  color: var(--bw-black);
+}
+
+.modal-tab-btn.active {
+  background-color: var(--bw-black);
+  color: var(--gdg-yellow);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px var(--bw-black);
+}
+
+.modal-tab-panel {
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-tab-panel.is-active {
+  display: flex;
+}
+
+.modal-speaker-row-inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.modal-inline-bio-trigger {
+  margin-top: 10px;
+  font-family: var(--font-arcade);
+  font-size: 0.72rem;
+  font-weight: 700;
+  background-color: var(--gdg-blue-soft);
+  color: var(--bw-black);
+  border: 2px solid var(--bw-black);
+  box-shadow: 2px 2px 0px var(--bw-black);
+  padding: 5px 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modal-inline-bio-trigger:hover {
+  background-color: var(--gdg-blue);
+  color: var(--bw-white);
+}
+
+/* Vista de Perfil del Speaker dentro del Modal */
+.modal-speaker-profile-hero {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  align-items: center;
+  background-color: var(--bw-gray-100);
+  border: 3px solid var(--bw-black);
+  padding: 16px;
+  box-shadow: var(--pixel-shadow-sm);
+}
+
+.modal-speaker-dual-portraits {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(180deg, #1E1E1E 0%, #333333 100%);
+  border: 3px solid var(--bw-black);
+  padding: 12px 14px;
+}
+
+.modal-speaker-mini-sprite {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-speaker-profile-name {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--bw-black);
+  line-height: 1.25;
+  margin-bottom: 4px;
+}
+
+.modal-speaker-profile-role {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--gdg-blue-dark);
+}
+
+.modal-speaker-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.btn-speaker-link {
+  font-size: 0.65rem;
+  padding: 8px 12px;
+  box-shadow: var(--pixel-shadow-sm);
+}
+
+.modal-speaker-session-summary {
+  background-color: var(--gdg-yellow-soft);
+  border: 3px solid var(--bw-black);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.modal-speaker-session-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 240px;
+}
+
+.modal-session-mini-label {
+  font-family: var(--font-arcade);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--bw-gray-700);
+}
 
 .modal-talk-title {
   font-size: 1.25rem;
@@ -1804,10 +2120,10 @@ body {
     box-shadow: var(--pixel-shadow-sm);
   }
 
-  /* Grilla de personajes Kunio-kun 3x3 en celular (sin scroll horizontal ni desbordes) */
+  /* Grilla de personajes Kunio-kun 5x2 en celular (sin scroll horizontal ni desbordes) */
   .kunio-parade-stage {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px 6px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px 4px;
     padding: 10px 6px;
   }
 
@@ -1999,12 +2315,28 @@ body {
     gap: 12px;
   }
 
-  .modal-arcade-stage {
+  .modal-arcade-stage,
+  .modal-speaker-profile-hero {
     grid-template-columns: 1fr;
     justify-items: center;
     text-align: center;
     padding: 12px;
     gap: 12px;
+  }
+
+  .modal-speaker-row-inline {
+    justify-content: center;
+    text-align: left;
+  }
+
+  .modal-tabs-bar {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .modal-tab-btn {
+    font-size: 0.74rem;
+    padding: 8px 10px;
   }
 
   .modal-badges-top {

@@ -846,6 +846,17 @@ export function renderKunioCharacter(avatarKey = 'devpicon', sizeClass = 'kunio-
 }
 
 /**
+ * Retorna el HTML de un retrato circular en 8-bits (recorte de cabeza/hombros del sprite)
+ * Ideal como avatar genérico 8-bit cuando un speaker no tiene foto o como fallback.
+ */
+export function renderKunioHeadshot(avatarKey = 'eduardo') {
+  const template = KUNIO_TEMPLATES[avatarKey] || KUNIO_TEMPLATES['panel'];
+  const croppedRows = template.frame1.slice(1, 15).map(row => row.slice(3, 17));
+  const svg = renderMatrixToSVG(croppedRows, 'kunio-headshot-svg');
+  return `<span class="kunio-headshot-wrap" data-avatar-head="${avatarKey}" aria-hidden="true">${svg}</span>`;
+}
+
+/**
  * Retorna el HTML de un badge tecnológico en 8-bits con ícono pixelado animado
  */
 export function renderTechBadge(techKey, showLabel = true) {

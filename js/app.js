@@ -1,5 +1,5 @@
 import { EVENT_DATA } from '../data/devfest-data.js';
-import { renderKunioCharacter, renderTechBadge } from './sprites.js';
+import { renderKunioCharacter, renderKunioHeadshot, renderTechBadge } from './sprites.js';
 
 // Estado de la aplicación
 const state = {
@@ -35,6 +35,72 @@ function minutesToTime(totalMinutes) {
   const hh = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
   const mm = String(totalMinutes % 60).padStart(2, '0');
   return `${hh}:${mm}`;
+}
+
+/**
+ * Renderiza el medallón circular del speaker (16x16 / 24x24 / 32x32 / 72x72).
+ * - Si el speaker tiene foto (`speakerPhoto`), muestra la imagen circular con fallback automático.
+ * - Si no tiene foto (ej. Eduardo Miranda), muestra el retrato 8-bits (`renderKunioHeadshot`) como avatar genérico.
+ */
+function renderSpeakerCircularAvatar(blockOrChar, sizeClass = 'circle-32') {
+  const avatarKey = blockOrChar.avatar || blockOrChar.key || 'panel';
+  const speakerName = blockOrChar.speaker || blockOrChar.fullName || blockOrChar.name || 'Speaker';
+  const photoUrl = blockOrChar.speakerPhoto || null;
+  const altPhotoUrl = blockOrChar.speakerPhotoAltUrl || '';
+  const accentColor = blockOrChar.badgeColor || 'blue';
+  const headshotFallback = renderKunioHeadshot(avatarKey);
+
+  if (!photoUrl) {
+    return `
+      <span
+        class="speaker-photo-circle ${sizeClass} circle-accent-${accentColor} is-fallback"
+        title="${speakerName} (Avatar 8-Bit)"
+      >
+        <span class="speaker-circle-fallback">${headshotFallback}</span>
+      </span>
+    `;
+  }
+
+  return `
+    <span
+      class="speaker-photo-circle ${sizeClass} circle-accent-${accentColor}"
+      title="${speakerName}"
+    >
+      <img
+        src="${photoUrl}"
+        ${altPhotoUrl ? `data-alt-src="${altPhotoUrl}"` : ''}
+        alt="Foto de ${speakerName}"
+        class="speaker-circle-img"
+        loading="lazy"
+        referrerpolicy="no-referrer"
+      />
+      <span class="speaker-circle-fallback">${headshotFallback}</span>
+    </span>
+  `;
+}
+
+/**
+ * Conecta el manejador `onerror` en las imágenes circulares de un contenedor
+ * para probar `data-alt-src` y, si también falla, mostrar el retrato 8-bits.
+ */
+function attachCircularAvatarFallbacks(rootEl) {
+  if (!rootEl) return;
+  rootEl.querySelectorAll('.speaker-circle-img').forEach(img => {
+    if (img.dataset.boundFallback) return;
+    img.dataset.boundFallback = 'true';
+    img.addEventListener('error', () => {
+      const altSrc = img.getAttribute('data-alt-src');
+      if (altSrc && img.src !== altSrc) {
+        img.src = altSrc;
+        img.removeAttribute('data-alt-src');
+        return;
+      }
+      const wrapper = img.closest('.speaker-photo-circle');
+      if (wrapper) {
+        wrapper.classList.add('is-fallback');
+      }
+    });
+  });
 }
 
 /**
@@ -80,7 +146,7 @@ function buildTrackTimeline(rawBlocks, tandaStartStr, tandaEndStr, room, schedul
     cursor = Math.max(cursor, bEnd);
   });
 
-  // ¿Queda tiempo libre al final de la tanda en esta sala? (Ej: un taller que dura 60 min en vez de 90 min)
+  // ¿Queda tiempo libre al final de la tanda en esta sala?
   if (cursor < tandaEnd) {
     const remainingMins = tandaEnd - cursor;
     if (remainingMins >= scheduleConfig.minGapMinutesToFill && scheduleConfig.autoFillGaps) {
@@ -152,20 +218,20 @@ function initMarquee() {
 
 /**
  * Extrae la lista única de speakers de las tandas en `data/agenda.json`
- * para mostrar sus avatares 8-bit en el escenario del Hero.
+ * para mostrar sus avatares 8-bit y medallones circulares en el escenario del Hero.
  */
 function extractSpeakersFromAgenda(agendaData) {
   const defaultCast = [
     { key: 'mikaeri', name: 'Mikaeri', badge: 'Google' },
-    { key: 'lucia', name: 'Lucía', badge: 'Google' },
-    { key: 'ranse', name: 'Ranse', badge: 'GDE Cloud' },
     { key: 'alvaro', name: 'Álvaro', badge: 'GDE Angular' },
+    { key: 'ranse', name: 'Ranse', badge: 'GDE Cloud' },
+    { key: 'jimmy', name: 'Jimmy', badge: 'GDE Angular' },
     { key: 'devpicon', name: 'Armando', badge: 'GDG Santiago' },
-    { key: 'lesly', name: 'Lesly', badge: 'GDE' },
+    { key: 'lesly', name: 'Lesly', badge: 'GDE Cloud AI' },
     { key: 'eduardo', name: 'Eduardo', badge: 'Datadog' },
     { key: 'julio', name: 'Julio', badge: 'GDE Cloud' },
-    { key: 'jimmy', name: 'Jimmy', badge: 'GDE Angular' },
-    { key: 'nicolas', name: 'Nicolás', badge: 'GDG Santiago' }
+    { key: 'nicolas', name: 'Nicolás', badge: 'GDE Cloud' },
+    { key: 'lucia', name: 'Lucía', badge: 'Google' }
   ];
 
   if (!agendaData || !Array.isArray(agendaData.blocks)) {
@@ -184,9 +250,16 @@ function extractSpeakersFromAgenda(agendaData) {
         const firstName = session.speaker.split(' ')[0];
         extracted.push({
           key: session.avatar,
+          avatar: session.avatar,
+          blockId: session.id,
           name: firstName,
           fullName: session.speaker,
-          badge: session.affiliation || session.badge || ''
+          badge: session.badge || session.affiliation || '',
+          badgeColor: session.badgeColor || 'blue',
+          speakerPhoto: session.speakerPhoto || null,
+          speakerPhotoAltUrl: session.speakerPhotoAltUrl || '',
+          speakerCountryFlag: session.speakerCountryFlag || '',
+          hasBio: Boolean(session.speakerBio)
         });
       });
     });
@@ -213,18 +286,39 @@ function initHeroSprites() {
     kunioParade.innerHTML = cast
       .map(
         char => `
-        <div class="kunio-stage-card" title="${char.fullName || char.name} (${char.badge})">
-          ${renderKunioCharacter(char.key, 'kunio-sm')}
-          <span class="kunio-stage-name">${char.name}</span>
-        </div>
+        <button
+          type="button"
+          class="kunio-stage-card"
+          data-hero-block-id="${char.blockId || ''}"
+          data-hero-tab="${char.hasBio ? 'speaker' : 'session'}"
+          title="${char.fullName || char.name} (${char.badge}) · Clic para ver ${char.hasBio ? 'perfil y sesión' : 'sesión'}"
+        >
+          <div class="kunio-stage-visual">
+            ${renderKunioCharacter(char.key, 'kunio-sm')}
+            ${renderSpeakerCircularAvatar(char, 'circle-24')}
+          </div>
+          <span class="kunio-stage-name">${char.speakerCountryFlag ? `${char.speakerCountryFlag} ` : ''}${char.name}</span>
+        </button>
       `
       )
       .join('');
+
+    attachCircularAvatarFallbacks(kunioParade);
+
+    kunioParade.querySelectorAll('[data-hero-block-id]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const blockId = btn.getAttribute('data-hero-block-id');
+        const tab = btn.getAttribute('data-hero-tab') || 'session';
+        if (blockId) {
+          openSessionModal(blockId, tab);
+        }
+      });
+    });
   }
 }
 
 /**
- * Renderiza un bloque plenario (Bienvenida UNAB, Bienvenida GDG, Pausa común, Preparación o Conversatorio de cierre)
+ * Renderiza un bloque plenario (Bienvenida UNAB, Bienvenida GDG, Pausa común, Preparación, Conversatorio o Cierre)
  */
 function renderPlenaryCard(block) {
   const startMins = timeToMinutes(block.startTime);
@@ -268,9 +362,17 @@ function renderPlenaryCard(block) {
 /**
  * Formatea el nombre del speaker (o lista de panelistas si están separados por " · ")
  */
-function formatSpeakerDisplay(speakerStr) {
+function formatSpeakerDisplay(speakerStr, countryFlag = '', countryName = '') {
   if (!speakerStr.includes(' · ')) {
-    return `<h4 class="block-speaker-name">${speakerStr}</h4>`;
+    const countryPill = countryName
+      ? `<span class="speaker-country-pill" title="País: ${countryName}">${countryFlag ? `${countryFlag} ` : ''}${countryName}</span>`
+      : '';
+    return `
+      <div class="speaker-name-wrap">
+        <h4 class="block-speaker-name">${speakerStr}</h4>
+        ${countryPill}
+      </div>
+    `;
   }
   const parts = speakerStr.split(' · ');
   return `
@@ -305,6 +407,11 @@ function renderTrackBlockCard(block, room) {
 
   const typeClass = `block-type-${block.type}`; // talk, workshop, panel, filler
   const colorClass = `room-accent-${room.color}`;
+  const hasSpeakerBio = Boolean(block.speakerBio);
+
+  // Medallón circular 32x32 del speaker (foto real o retrato 8-bits si es Eduardo / sin foto)
+  const circularAvatarHtml =
+    block.type !== 'filler' ? renderSpeakerCircularAvatar(block, 'circle-32') : '';
 
   return `
     <article
@@ -329,11 +436,14 @@ function renderTrackBlockCard(block, room) {
 
       <div class="block-main-body">
         <div class="block-speaker-row">
-          <div class="block-avatar-frame">
-            ${renderKunioCharacter(block.avatar, 'kunio-sm')}
+          <div class="block-avatar-combo">
+            <div class="block-avatar-frame">
+              ${renderKunioCharacter(block.avatar, 'kunio-sm')}
+            </div>
+            ${circularAvatarHtml}
           </div>
           <div class="block-speaker-meta">
-            ${formatSpeakerDisplay(block.speaker)}
+            ${formatSpeakerDisplay(block.speaker, block.speakerCountryFlag, block.speakerCountry)}
             ${block.affiliation ? `<p class="block-moderators">${block.affiliation}</p>` : ''}
             ${block.moderators ? `<p class="block-moderators">${block.moderators}</p>` : ''}
             <p class="block-duration-note">${block.durationNote || `${block.durationMinutes} minutos`}</p>
@@ -341,6 +451,11 @@ function renderTrackBlockCard(block, room) {
         </div>
 
         <h3 class="block-talk-title">${block.title}</h3>
+        ${
+          block.description
+            ? `<p class="block-talk-excerpt">${block.description}</p>`
+            : ''
+        }
       </div>
 
       <div class="block-card-footer">
@@ -349,7 +464,26 @@ function renderTrackBlockCard(block, room) {
           <div class="block-tags-list">${tagsHtml}</div>
         </div>
         <div class="block-cta-row">
-          <span class="press-start-hint">▶ PULSAR PARA VER DETALLE</span>
+          <button
+            type="button"
+            class="press-start-hint btn-card-tab"
+            data-card-open-tab="session"
+            title="Ver detalles completos de la sesión"
+          >
+            📜 VER SESIÓN
+          </button>
+          ${
+            hasSpeakerBio
+              ? `<button
+                  type="button"
+                  class="press-start-hint btn-card-tab btn-card-speaker"
+                  data-card-open-tab="speaker"
+                  title="Ver biografía e información de ${block.speaker}"
+                >
+                  👤 PERFIL SPEAKER
+                </button>`
+              : ''
+          }
         </div>
       </div>
     </article>
@@ -444,33 +578,50 @@ function renderFullSchedule() {
     .join('');
 
   container.innerHTML = blocksHtml;
+  attachCircularAvatarFallbacks(container);
+
+  // Botones específicos de pestaña dentro de cada tarjeta (Ver Sesión vs Perfil Speaker)
+  container.querySelectorAll('[data-card-open-tab]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const card = btn.closest('[data-block-id]');
+      if (!card) return;
+      const blockId = card.getAttribute('data-block-id');
+      const targetTab = btn.getAttribute('data-card-open-tab') || 'session';
+      openSessionModal(blockId, targetTab);
+    });
+  });
 
   // Asignar eventos de clic y teclado a cada bloque del programa
   container.querySelectorAll('[data-block-id]').forEach(el => {
     el.addEventListener('click', () => {
       const blockId = el.getAttribute('data-block-id');
-      openSessionModal(blockId);
+      openSessionModal(blockId, 'session');
     });
     el.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         const blockId = el.getAttribute('data-block-id');
-        openSessionModal(blockId);
+        openSessionModal(blockId, 'session');
       }
     });
   });
 }
 
 /**
- * Abre el Modal 8-Bits con el avatar en movimiento del charlista, descripción, tags y logos
+ * Abre el Modal 8-Bits con pestañas separadas para la Sesión y el Perfil del Speaker.
+ * Si el speaker no tiene información de perfil (ej. Eduardo Miranda), la pestaña de perfil no está disponible.
  */
-function openSessionModal(blockId) {
+function openSessionModal(blockId, initialTab = 'session') {
   const block = state.blocksIndex.get(blockId);
   if (!block) return;
 
   const modal = document.getElementById('session-modal');
   const modalBody = document.getElementById('session-modal-body');
   if (!modal || !modalBody) return;
+
+  const hasSpeakerProfile = Boolean(block.speakerBio);
+  const activeTab = hasSpeakerProfile && initialTab === 'speaker' ? 'speaker' : 'session';
 
   const techBadgesHtml = (block.techLogos || [])
     .map(key => renderTechBadge(key, true))
@@ -480,54 +631,156 @@ function openSessionModal(blockId) {
     .map(tag => `<span class="modal-tag-chip">#${tag}</span>`)
     .join('');
 
-  const sessionizeBtn = block.sessionizeUrl
-    ? `<a href="${block.sessionizeUrl}" target="_blank" rel="noopener noreferrer" class="btn-8bit btn-8bit-secondary">🔗 VER EN SESSIONIZE</a>`
+  const tabsBarHtml = hasSpeakerProfile
+    ? `
+      <div class="modal-tabs-bar" role="tablist" aria-label="Secciones de información">
+        <button
+          type="button"
+          role="tab"
+          aria-selected="${activeTab === 'session'}"
+          class="modal-tab-btn ${activeTab === 'session' ? 'active' : ''}"
+          data-switch-modal-tab="session"
+        >
+          📜 INFO DE LA SESIÓN
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected="${activeTab === 'speaker'}"
+          class="modal-tab-btn ${activeTab === 'speaker' ? 'active' : ''}"
+          data-switch-modal-tab="speaker"
+        >
+          👤 PERFIL DEL SPEAKER
+        </button>
+      </div>
+    `
+    : '';
+
+  const countryBadgeHtml = block.speakerCountry
+    ? `<span class="modal-country-chip">${block.speakerCountryFlag ? `${block.speakerCountryFlag} ` : ''}${block.speakerCountry}</span>`
     : '';
 
   modalBody.innerHTML = `
-    <div class="modal-arcade-stage">
-      <div class="modal-avatar-box">
-        ${renderKunioCharacter(block.avatar || 'devpicon', 'kunio-lg')}
-        <span class="avatar-status-pill">● SPEAKER 8-BIT ACTIVO</span>
-      </div>
-      <div class="modal-Locate-info">
-        <div class="modal-badges-top">
-          <span class="modal-room-chip">${block.roomLabel || 'AUDITORIO'}</span>
-          <span class="modal-time-chip">🕒 ${block.startTime} – ${block.endTime} (${block.durationMinutes} min)</span>
-          <span class="modal-affiliation-chip">${block.badge || ''}</span>
+    ${tabsBarHtml}
+
+    <!-- PANEL 1: INFORMACIÓN DE LA SESIÓN -->
+    <div class="modal-tab-panel ${activeTab === 'session' ? 'is-active' : ''}" data-modal-panel="session">
+      <div class="modal-arcade-stage">
+        <div class="modal-avatar-box">
+          ${renderKunioCharacter(block.avatar || 'devpicon', 'kunio-lg')}
+          <span class="avatar-status-pill">● SPEAKER 8-BIT ACTIVO</span>
         </div>
-        <h2 class="modal-talk-title">${block.title}</h2>
-        <p class="modal-speaker-line">👤 <strong>${block.speaker}</strong> ${block.affiliation ? `· <span>${block.affiliation}</span>` : ''}</p>
-        ${block.moderators ? `<p class="modal-moderators-line">🎙️ ${block.moderators}</p>` : ''}
-        ${block.durationNote ? `<p class="modal-duration-detail">⏱️ ${block.durationNote}</p>` : ''}
+        <div class="modal-Locate-info">
+          <div class="modal-badges-top">
+            <span class="modal-room-chip">${block.roomLabel || 'AUDITORIO'}</span>
+            <span class="modal-time-chip">🕒 ${block.startTime} – ${block.endTime} (${block.durationMinutes} min)</span>
+            <span class="modal-affiliation-chip">${block.badge || ''}</span>
+            ${countryBadgeHtml}
+          </div>
+          <h2 class="modal-talk-title">${block.title}</h2>
+          <div class="modal-speaker-row-inline">
+            ${block.type !== 'filler' && block.avatar !== 'panel' ? renderSpeakerCircularAvatar(block, 'circle-36') : ''}
+            <div>
+              <p class="modal-speaker-line"><strong>${block.speaker}</strong> ${block.affiliation ? `· <span>${block.affiliation}</span>` : ''}</p>
+              ${block.moderators ? `<p class="modal-moderators-line">🎙️ ${block.moderators}</p>` : ''}
+              ${block.durationNote ? `<p class="modal-duration-detail">⏱️ ${block.durationNote}</p>` : ''}
+            </div>
+          </div>
+          ${
+            hasSpeakerProfile
+              ? `<button type="button" class="modal-inline-bio-trigger" data-switch-modal-tab="speaker">
+                  👤 Conocer biografía y perfil de ${block.speaker.split(' ')[0]} →
+                </button>`
+              : ''
+          }
+        </div>
+      </div>
+
+      <div class="modal-description-box">
+        <h3 class="modal-section-heading">📜 DESCRIPCIÓN DE LA SESIÓN</h3>
+        <p class="modal-description-text">${block.description}</p>
+      </div>
+
+      <div class="modal-tech-section">
+        <h3 class="modal-section-heading">⚡ TECNOLOGÍAS & LOGOS RELACIONADOS</h3>
+        <div class="modal-tech-logos-row">
+          ${techBadgesHtml}
+        </div>
+        <div class="modal-tags-row">
+          ${tagsHtml}
+        </div>
       </div>
     </div>
 
-    <div class="modal-description-box">
-      <h3 class="modal-section-heading">📜 DESCRIPCIÓN DE LA SESIÓN</h3>
-      <p class="modal-description-text">${block.description}</p>
-    </div>
+    <!-- PANEL 2: PERFIL DEL SPEAKER (Solo disponible si el speaker tiene bio registrada) -->
+    ${
+      hasSpeakerProfile
+        ? `
+        <div class="modal-tab-panel ${activeTab === 'speaker' ? 'is-active' : ''}" data-modal-panel="speaker">
+          <div class="modal-speaker-profile-hero">
+            <div class="modal-speaker-dual-portraits">
+              ${renderSpeakerCircularAvatar(block, 'circle-72')}
+              <div class="modal-speaker-mini-sprite" title="Sprite 8-Bit de ${block.speaker}">
+                ${renderKunioCharacter(block.avatar || 'devpicon', 'kunio-sm')}
+              </div>
+            </div>
+            <div class="modal-speaker-profile-meta">
+              <div class="modal-badges-top">
+                <span class="modal-affiliation-chip">${block.badge || 'SPEAKER'}</span>
+                ${countryBadgeHtml}
+                <span class="modal-room-chip">${block.roomLabel || 'AUDITORIO'} · ${block.startTime}</span>
+              </div>
+              <h2 class="modal-speaker-profile-name">${block.speaker}</h2>
+              ${block.affiliation ? `<p class="modal-speaker-profile-role">${block.affiliation}</p>` : ''}
+            </div>
+          </div>
 
-    <div class="modal-tech-section">
-      <h3 class="modal-section-heading">⚡ TECNOLOGÍAS & LOGOS RELACIONADOS</h3>
-      <div class="modal-tech-logos-row">
-        ${techBadgesHtml}
-      </div>
-      <div class="modal-tags-row">
-        ${tagsHtml}
-      </div>
-    </div>
+          <div class="modal-description-box modal-bio-box">
+            <h3 class="modal-section-heading">🪪 ACERCA DE ${block.speaker.toUpperCase()}</h3>
+            <p class="modal-description-text">${block.speakerBio}</p>
+          </div>
+
+          <div class="modal-speaker-session-summary">
+            <div class="modal-speaker-session-info">
+              <span class="modal-session-mini-label">🎤 SESIÓN EN DEVFEST SANTIAGO 2026:</span>
+              <strong>${block.title}</strong>
+              <span>🕒 ${block.startTime} – ${block.endTime} · ${block.roomLabel}</span>
+            </div>
+            <button type="button" class="btn-8bit btn-8bit-ghost" data-switch-modal-tab="session">
+              📜 VER DESCRIPCIÓN DE LA SESIÓN
+            </button>
+          </div>
+        </div>
+      `
+        : ''
+    }
 
     <div class="modal-actions-footer">
       <a href="${EVENT_DATA.meta.registrationUrl}" target="_blank" rel="noopener noreferrer" class="btn-8bit btn-8bit-primary">
         🎟️ REGISTRARSE EN LUMA
       </a>
-      ${sessionizeBtn}
       <button type="button" class="btn-8bit btn-8bit-ghost" id="modal-close-action">
         ✕ CERRAR VENTANA
       </button>
     </div>
   `;
+
+  attachCircularAvatarFallbacks(modalBody);
+
+  // Eventos para cambiar entre las pestañas "Sesión" y "Perfil del Speaker"
+  modalBody.querySelectorAll('[data-switch-modal-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetTab = btn.getAttribute('data-switch-modal-tab');
+      modalBody.querySelectorAll('.modal-tab-btn').forEach(tabBtn => {
+        const isSelected = tabBtn.getAttribute('data-switch-modal-tab') === targetTab;
+        tabBtn.classList.toggle('active', isSelected);
+        tabBtn.setAttribute('aria-selected', String(isSelected));
+      });
+      modalBody.querySelectorAll('.modal-tab-panel').forEach(panel => {
+        panel.classList.toggle('is-active', panel.getAttribute('data-modal-panel') === targetTab);
+      });
+    });
+  });
 
   modal.classList.add('is-open');
   modal.setAttribute('aria-hidden', 'false');

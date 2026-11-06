@@ -15,8 +15,8 @@ export const EVENT_DATA = {
   meta: {
     title: "DevFest Santiago de Chile 2026",
     edition: "Edición 8-Bits · GDG Santiago",
-    statusLabel: "VERSIÓN ACTUALIZADA · 4 DE NOVIEMBRE DE 2026",
-    lastUpdated: "4 de noviembre de 2026",
+    statusLabel: "VERSIÓN ACTUALIZADA · 6 DE NOVIEMBRE DE 2026",
+    lastUpdated: "6 de noviembre de 2026",
     dateText: "Sábado 7 de noviembre de 2026",
     timeText: "09:00 – 14:00 hrs (CLT)",
     venue: {
