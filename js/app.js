@@ -756,8 +756,8 @@ function openSessionModal(blockId, initialTab = 'session') {
     }
 
     <div class="modal-actions-footer">
-      <a href="${EVENT_DATA.meta.registrationUrl}" target="_blank" rel="noopener noreferrer" class="btn-8bit btn-8bit-primary">
-        🎟️ REGISTRARSE EN LUMA
+      <a href="#sede" class="btn-8bit btn-8bit-primary" id="modal-venue-action">
+        🏛️ CÓMO LLEGAR A LA SEDE
       </a>
       <button type="button" class="btn-8bit btn-8bit-ghost" id="modal-close-action">
         ✕ CERRAR VENTANA
@@ -789,6 +789,13 @@ function openSessionModal(blockId, initialTab = 'session') {
   const closeActionBtn = document.getElementById('modal-close-action');
   if (closeActionBtn) {
     closeActionBtn.addEventListener('click', closeSessionModal);
+  }
+
+  const venueActionBtn = document.getElementById('modal-venue-action');
+  if (venueActionBtn) {
+    venueActionBtn.addEventListener('click', () => {
+      closeSessionModal();
+    });
   }
 }
 

@@ -26,7 +26,7 @@ export const EVENT_DATA = {
       address: "Av. Bellavista 0121, Providencia, Santiago",
       mapUrl: "https://maps.google.com/?q=Universidad+Andres+Bello+Campus+Bellavista+Santiago"
     },
-    registrationUrl: "https://luma.com/7p4i60n3",
+    registrationUrl: "https://gdg.community.dev/gdg-santiago-de-chile/",
     githubRepoUrl: "https://github.com/GDGSantiagoDeChile/devfestsantiago26",
     chapterUrl: "https://gdg.community.dev/gdg-santiago-de-chile/",
     agendaJsonPath: "data/agenda.json"
@@ -37,11 +37,12 @@ export const EVENT_DATA = {
    * Se desplaza continuamente en la parte superior. Puedes agregar o quitar mensajes.
    */
   announcements: [
-    "🕹️ ¡REGISTRO GRATUITO ABIERTO EN LUMA! ASEGURA TU ENTRADA ANTES DE QUE SE AGOTEN LOS CUPOS",
-    "📅 SÁBADO 7 DE NOVIEMBRE DE 2026 · 09:00 A 14:00 HRS · UNAB CAMPUS BELLAVISTA",
-    "⚡ CRONOGRAMA ACTUALIZADO: 1 AUDITORIO + 3 SALAS CON TALLERES / CHARLAS DE ESPECIALIDAD SIMULTÁNEOS",
-    "💻 SEIS TALLERES / CHARLAS DE ESPECIALIDAD DE 90 MINUTOS + CONVERSATORIO DE CIERRE",
-    "👾 PULSA SOBRE CUALQUIER BLOQUE DE LA AGENDA PARA VER EL AVATAR 8-BITS Y DETALLES DE LA SESIÓN"
+    "⛔ INSCRIPCIONES EN LUMA CERRADAS · EL INGRESO SE PRIORIZARÁ POR ORDEN DE LLEGADA",
+    "✈️ ¿VIENES DE REGIÓN Y NO ALCANZASTE CUPO? ENVÍANOS UN MENSAJE DIRECTO PARA GESTIONAR TU ACCESO",
+    "📅 SÁBADO 7 DE NOVIEMBRE DE 2026 · RECEPCIÓN Y ACREDITACIÓN DESDE LAS 08:30 HRS · UNAB CAMPUS BELLAVISTA",
+    "⚡ CRONOGRAMA: 1 AUDITORIO + 3 SALAS CON TALLERES Y CHARLAS DE ESPECIALIDAD SIMULTÁNEOS",
+    "💻 SEIS TALLERES / CHARLAS DE ESPECIALIDAD DE 90 MINUTOS + CONVERSATORIO SOBRE IA",
+    "👾 PULSA SOBRE CUALQUIER BLOQUE DE LA AGENDA PARA VER DETALLES DE LA SESIÓN Y PERFIL DEL SPEAKER"
   ],
 
   /**
@@ -135,7 +136,7 @@ export const EVENT_DATA = {
         role: "Sponsors Comunitarios & Media Partners",
         logoText: "Comunidades Aliadas",
         badgeColor: "#34A853",
-        url: "https://luma.com/7p4i60n3",
+        url: "https://gdg.community.dev/gdg-santiago-de-chile/",
         description: "¿Tu comunidad quiere sumarse como Sponsor Comunitario? ¡Escríbenos para aparecer aquí con tu logo oficial!"
       }
     ]
