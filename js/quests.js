@@ -60,6 +60,25 @@ class RetroAudioEngine {
       osc.stop(this.ctx.currentTime + 0.08);
     } catch (e) {}
   }
+  coinSound() {
+    try {
+      this._init();
+      if (!this.ctx) return;
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+      // Sonido retro de moneda estilo Mario / Arcade: B5 (987.77 Hz) -> E6 (1318.51 Hz)
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(987.77, this.ctx.currentTime);
+      osc.frequency.setValueAtTime(1318.51, this.ctx.currentTime + 0.065);
+      gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.36);
+    } catch (e) {}
+  }
   colorBeep(idx) {
     try {
       this._init();
@@ -147,7 +166,8 @@ function flashGlitch(element) {
 
 // Frases aleatorias para los globitos de diálogo retro de otros speakers
 const _TECH_QUOTES = [
-  'Gemini 1.5 Pro analizó este bloque en 12ms 🧠⚡',
+  'Gemini 3.8 Flash analizó este bloque en 12ms 🧠⚡',
+  'Gemini 4 Argon orquestando agentes autónomos 🦾✨',
   '¿Alucinaciones? No en mi pipeline de RAG 🤖',
   'Vertex AI orquestando agentes autónomos 🦾',
   'Multimodalidad pura: texto, audio y píxeles ✨',
@@ -244,7 +264,7 @@ document.addEventListener('click', e => {
   if (
     _currentBubbleEl &&
     !e.target.closest(
-      '.speaker-speech-bubble, .block-avatar-frame, .plenary-avatar-col, .tech-badge-8bit, .gdg-color-strip'
+      '.speaker-speech-bubble, .block-avatar-frame, .plenary-avatar-col, .tech-badge-8bit, .gdg-color-strip, .arcade-pill-btn, .kunio-stage-visual'
     )
   ) {
     dismissActiveBubble();
@@ -565,10 +585,264 @@ function initMissionNicolas() {
 }
 
 /**
+ * Lanza lluvia de confeti de píxeles 8-bits (para Konami Code y hitos)
+ */
+function launchPixelConfetti() {
+  const colors = ['#4285F4', '#EA4335', '#FBBC04', '#34A853', '#7F52FF', '#FFFFFF'];
+  const count = 48;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'pixel-confetti-particle';
+    p.style.left = `${Math.random() * 100}vw`;
+    p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    p.style.animationDelay = `${Math.random() * 0.9}s`;
+    p.style.animationDuration = `${2.2 + Math.random() * 1.4}s`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 4200);
+  }
+}
+
+/**
+ * Ventana modal retro para el Konami Code
+ */
+function showKonamiModal() {
+  audioEngine.victoryFanfare();
+  triggerHaptic('unlock');
+  launchPixelConfetti();
+
+  const html = `
+    <div class="quest-modal-body" style="text-align: center;">
+      <div class="quest-icon-banner">👾 🕹️ 🌟</div>
+      <span class="quest-badge-tag">★ CÓDIGO CLÁSICO 1986 ACTIVADO ★</span>
+      <h2 class="quest-title" style="color: var(--gdg-yellow);">¡+30 VIDAS EXTRA DESBLOQUEADAS!</h2>
+      <div class="quest-content-box">
+        <p class="quest-lead">¡Has invocado la secuencia legendaria de los arcades de los 90!</p>
+        <div class="quest-mission-card">
+          <span class="quest-mission-label">🎮 BONUS ESPECIAL DE ENERGÍA:</span>
+          <p>Energía infinita concedida para todas las charlas, talleres y networking del DevFest Santiago 2026.</p>
+          <div class="quest-code-pill" style="font-size: clamp(0.85rem, 2.5vw, 1.1rem); letter-spacing: 3px;">
+            ▲ ▲ ▼ ▼ ◄ ► ◄ ► B A
+          </div>
+          <p class="quest-action-goal">¡Sigue jugando y disfrutando el evento!</p>
+        </div>
+      </div>
+    </div>
+  `;
+  showSecretModal(html);
+}
+
+/**
+ * Gestor del legendario Konami Code: ↑ ↑ ↓ ↓ ← → ← → B A
+ */
+function initKonamiCode() {
+  const konamiSeq = [
+    'ArrowUp', 'ArrowUp',
+    'ArrowDown', 'ArrowDown',
+    'ArrowLeft', 'ArrowRight',
+    'ArrowLeft', 'ArrowRight',
+    'b', 'a'
+  ];
+  let curIdx = 0;
+
+  window.addEventListener('keydown', e => {
+    // Si el usuario está tecleando en un input o textarea (ej. buscador de agenda), ignorar
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+      return;
+    }
+
+    const key = e.key.toLowerCase();
+    const expected = konamiSeq[curIdx].toLowerCase();
+
+    if (key === expected) {
+      curIdx++;
+      if (curIdx === konamiSeq.length) {
+        curIdx = 0;
+        showKonamiModal();
+      }
+    } else {
+      curIdx = key === 'arrowup' ? 1 : 0;
+    }
+  });
+}
+
+/**
+ * Botón "INSERT COIN" con contador de créditos arcade
+ */
+let _coinsCount = 0;
+
+function initArcadeCoinCounter() {
+  const coinBtn = document.getElementById('btn-insert-coin');
+  const counterEl = document.getElementById('coin-counter');
+  if (!coinBtn || !counterEl) return;
+
+  coinBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    _coinsCount++;
+    counterEl.textContent = String(_coinsCount).padStart(2, '0');
+
+    audioEngine.coinSound();
+    triggerHaptic('step');
+
+    // Animación de moneda flotante "+1 COIN"
+    const floatBadge = document.createElement('span');
+    floatBadge.className = 'coin-float-badge';
+    floatBadge.textContent = '+1 COIN';
+    coinBtn.appendChild(floatBadge);
+    setTimeout(() => floatBadge.remove(), 750);
+
+    if (_coinsCount === 10) {
+      audioEngine.powerUpJingle();
+      triggerHaptic('unlock');
+      launchPixelConfetti();
+      showSpeechBubble(coinBtn, '🪙 ¡FREE PLAY ACTIVADO! Modo arcade desbloqueado 🕹️', 'below', 6500);
+    } else if (_coinsCount === 25) {
+      audioEngine.victoryFanfare();
+      triggerHaptic('unlock');
+      launchPixelConfetti();
+      showSpeechBubble(coinBtn, '🏆 ¡MAESTRO DEL ARCADE! Créditos infinitos para el DevFest 🚀', 'below', 6500);
+    }
+  });
+}
+
+/**
+ * Interruptor de Filtro de Pantalla CRT Retro de los 90
+ */
+function initCrtFilter() {
+  const crtBtn = document.getElementById('btn-toggle-crt');
+  const statusEl = document.getElementById('crt-status');
+  if (!crtBtn || !statusEl) return;
+
+  crtBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    const isActive = document.body.classList.toggle('crt-active');
+    crtBtn.classList.toggle('is-active', isActive);
+    statusEl.textContent = isActive ? 'ON' : 'OFF';
+
+    audioEngine.stepBeep();
+    triggerHaptic('step');
+
+    showSpeechBubble(
+      crtBtn,
+      isActive ? '📺 Filtro CRT Activado (Scanlines 90s) ✨' : '📺 Filtro CRT Desactivado 💡',
+      'below',
+      3000
+    );
+  });
+}
+
+/**
+ * Reacciones de los demás badges tecnológicos del Hero
+ */
+const _HERO_BADGE_QUOTES = {
+  ai: 'Gemini 3.8 Flash & Gemini 4 Argon: multimodalidad y agentes autónomos 🧠⚡',
+  android: 'Android 16 con Jetpack Compose y KMP a toda velocidad 🤖📱',
+  angular: 'Angular 22: Signals, reactividad pura y modo offline 🅰️⚡',
+  cloud: 'Cloud Run y Kubernetes en us-central1: 100% serverless ☁️🚀',
+  firebase: 'Firestore y Data Connect sincronizando en tiempo real 🔥💾',
+  workspace: 'Gemini en Docs, Sheets y Gmail acelerando tu flujo 💼✨',
+  tf: 'Prototipado de agentes y fine-tuning con AI Studio 🦾✨',
+  flutter: 'Flutter Multiplatform: una sola base de código para todo 💙📱'
+};
+
+function initHeroBadgeReactions() {
+  const techList = document.getElementById('hero-tech-badges');
+  if (!techList) return;
+
+  techList.addEventListener('click', e => {
+    const badge = e.target.closest('.tech-badge-8bit');
+    if (!badge) return;
+    const title = (badge.getAttribute('title') || '').toLowerCase();
+    if (title.includes('kotlin')) return; // Kotlin está reservado para la Misión de Armando
+
+    e.stopPropagation();
+    flashGlitch(badge);
+    audioEngine.stepBeep();
+    triggerHaptic('step');
+
+    let quote = '¡Tecnología oficial presente en el DevFest Santiago! 🚀';
+    if (title.includes('gemini') || title.includes('ia') || title.includes('ai')) {
+      quote = _HERO_BADGE_QUOTES.ai;
+    } else if (title.includes('android')) {
+      quote = _HERO_BADGE_QUOTES.android;
+    } else if (title.includes('angular')) {
+      quote = _HERO_BADGE_QUOTES.angular;
+    } else if (title.includes('cloud')) {
+      quote = _HERO_BADGE_QUOTES.cloud;
+    } else if (title.includes('firebase')) {
+      quote = _HERO_BADGE_QUOTES.firebase;
+    } else if (title.includes('workspace')) {
+      quote = _HERO_BADGE_QUOTES.workspace;
+    } else if (title.includes('studio') || title.includes('tensor')) {
+      quote = _HERO_BADGE_QUOTES.tf;
+    } else if (title.includes('flutter')) {
+      quote = _HERO_BADGE_QUOTES.flutter;
+    }
+
+    showSpeechBubble(badge, quote, null, 4800);
+  });
+}
+
+/**
+ * Reacciones de los personajes Kunio-kun en el desfile del Hero
+ */
+const _PARADE_SPEAKER_QUOTES = {
+  devpicon: '¡Bienvenidos al DevFest Santiago 2026! Ojo con los secretos 😉👾',
+  armando: '¡Bienvenidos al DevFest Santiago 2026! Ojo con los secretos 😉👾',
+  nicolas: '¡Google Cloud y GDG Santiago presentes en Sala 2! ☁️✨',
+  nico: '¡Google Cloud y GDG Santiago presentes en Sala 2! ☁️✨',
+  lesly: '¡BigQuery y Vertex AI para llevar los datos al siguiente nivel! 📊🧠',
+  jimmy: '¡Angular y Gemini en el navegador sin servidores! 🅰️⚡',
+  alvaro: '¡Observabilidad total para no sufrir en producción! 📈🛡️',
+  julio: '¡La era de los agentes autónomos con IA ya está aquí! 🦾✨',
+  lucia: '¡Aprende, comparte y disfruta esta gran jornada del GDG! 🚀🌟',
+  ranse: '¡Agentes inteligentes y automatización sin límites! 🤖💡',
+  eduardo: '¡UNAB y GDG Santiago juntos en Sede Bellavista! 🏛️🎓'
+};
+
+function initHeroParadeReactions() {
+  const parade = document.getElementById('hero-kunio-parade');
+  if (!parade) return;
+
+  parade.addEventListener(
+    'click',
+    e => {
+      const visual = e.target.closest('.kunio-stage-visual');
+      if (!visual) return; // Si hace clic fuera del muñequito (ej. nombre), abre la sesión
+
+      e.stopPropagation();
+      e.preventDefault();
+
+      const card = visual.closest('.kunio-stage-card');
+      const title = (card ? card.getAttribute('title') || '' : '').toLowerCase();
+
+      flashGlitch(visual);
+      audioEngine.stepBeep();
+      triggerHaptic('step');
+
+      let quote = '¡Nos vemos en mi sesión del DevFest Santiago! 🚀✨';
+      for (const [key, msg] of Object.entries(_PARADE_SPEAKER_QUOTES)) {
+        if (title.includes(key)) {
+          quote = msg;
+          break;
+        }
+      }
+
+      showSpeechBubble(visual, quote, null, 4800);
+    },
+    true // capture phase para interceptar antes del modal
+  );
+}
+
+/**
  * Punto de entrada del sistema de misiones secretas y sprites interactivos
  */
 export function initSecretQuests() {
   initMissionArmando();
   initMissionNicolas();
   initSpriteInteractions();
+  initArcadeCoinCounter();
+  initCrtFilter();
+  initKonamiCode();
+  initHeroBadgeReactions();
+  initHeroParadeReactions();
 }

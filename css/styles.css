@@ -2531,8 +2531,138 @@ body {
 }
 
 /* ============================================================================
- * GLOBO DE DIÁLOGO RETRO 8-BITS (SPEAKER SPRITE SPEECH BUBBLES)
+ * INTERACCIONES LÚDICAS ARCADE & RETRO
  * ============================================================================ */
+
+/* Barra de controles rápidos Arcade en Header */
+.arcade-quick-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .arcade-quick-bar {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+.arcade-pill-btn {
+  background-color: var(--bw-black);
+  color: var(--bw-white);
+  border: 2px solid var(--gdg-yellow);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.4);
+  font-family: var(--font-arcade);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 5px 11px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  position: relative;
+  transition: transform 0.1s steps(2), background-color 0.12s, border-color 0.12s;
+  white-space: nowrap;
+}
+
+.arcade-pill-btn:hover {
+  transform: translate(-1px, -1px);
+  background-color: #262626;
+  border-color: var(--gdg-yellow);
+}
+
+.arcade-pill-btn:active {
+  transform: translate(1px, 1px);
+}
+
+.arcade-pill-btn.crt-btn {
+  border-color: #00e5ff;
+}
+
+.arcade-pill-btn.crt-btn.is-active {
+  background-color: #00363a;
+  border-color: #00e5ff;
+  color: #00e5ff;
+}
+
+.coin-float-badge {
+  position: absolute;
+  top: -12px;
+  right: 4px;
+  font-family: var(--font-pixel);
+  font-size: 0.76rem;
+  color: var(--gdg-yellow);
+  text-shadow: 2px 2px 0 #000;
+  pointer-events: none;
+  animation: coinFloatUp 0.75s ease-out forwards;
+  z-index: 1000;
+}
+
+@keyframes coinFloatUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-26px) scale(1.15);
+  }
+}
+
+/* Filtro de pantalla CRT retro de los 90 (Scanlines + Viñeta) */
+body.crt-active::before {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.26) 50%),
+              linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  z-index: 99998;
+  background-size: 100% 3px, 6px 100%;
+  pointer-events: none;
+}
+
+body.crt-active::after {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: radial-gradient(circle at center, transparent 65%, rgba(0, 0, 0, 0.42) 100%);
+  z-index: 99999;
+  pointer-events: none;
+}
+
+/* Confeti de píxeles 8-bits para Konami Code */
+.pixel-confetti-particle {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  pointer-events: none;
+  z-index: 10000;
+  animation: pixelFall 2.8s linear forwards;
+}
+
+@keyframes pixelFall {
+  0% {
+    opacity: 1;
+    transform: translateY(-20px) rotate(0deg);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(105vh) rotate(360deg);
+  }
+}
 .speaker-speech-bubble {
   position: absolute;
   bottom: calc(100% + 10px);
