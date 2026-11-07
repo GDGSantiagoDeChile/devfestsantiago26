@@ -1,9 +1,10 @@
 /**
  * ============================================================================
- * SISTEMA SECRETO DE MISIONES · DEVFEST SANTIAGO 2026
+ * SISTEMA SECRETO DE MISIONES & INTERACCIONES 8-BITS · DEVFEST SANTIAGO 2026
  * ============================================================================
- * Respuestas hápticas, micro-audio 8-bits nativo (Web Audio API) y payloads
- * cifrados con clave dinámica generada en tiempo de ejecución.
+ * - Respuestas hápticas nativas y micro-audio 8-bits (Web Audio API).
+ * - Payloads de misiones cifrados (XOR + Base64) con clave dinámica en memoria.
+ * - Sprites 8-bits interactivos con globitos de diálogo retro y frases tech.
  * ============================================================================
  */
 
@@ -102,25 +103,129 @@ function flashGlitch(element) {
   setTimeout(() => element.classList.remove('secret-pulse'), 350);
 }
 
+// Frases aleatorias para los globitos de diálogo retro de otros speakers
+const _TECH_QUOTES = [
+  'Gemini 1.5 Pro analizó este bloque en 12ms 🧠⚡',
+  '¿Alucinaciones? No en mi pipeline de RAG 🤖',
+  'Vertex AI orquestando agentes autónomos 🦾',
+  'Multimodalidad pura: texto, audio y píxeles ✨',
+  '¡Prompt engineering de nivel maestro! 📝🧙‍♂️',
+  'El futuro es de los agentes con IA... ¡y café! ☕🤖',
+  '¡Null safety activado! Cero NullPointerExceptions 🛡️',
+  'Compilando Kotlin Multiplatform a la velocidad de la luz ⚡',
+  'Compose Multiplatform para dominarlos a todos 🤖📱',
+  'Corrutinas listas, cero bloqueos en la UI 🧵💨',
+  '¡Android 16 ya viene en camino! 🤖🚀',
+  '¿Quién necesita servidores cuando hay Cloud Run? ☁️',
+  '100% serverless, 0% estrés en producción 🔥',
+  'Firestore sincronizando en tiempo real ⚡💾',
+  '¡Mi cluster de GKE está durmiendo la siesta! 😴☁️',
+  'Desplegando en la nube en 3... 2... 1... 🚀',
+  'Signal Forms en Angular: reactividad pura 🅰️⚡',
+  '¡Adiós NgModules, hola Standalone Components! 🅰️✨',
+  'Hydration instantánea en el navegador 🌐⚡',
+  'CSS Grid y píxeles 8-bit: la combinación definitiva 👾',
+  'BigQuery procesando 1 TB en 3 segundos 📊💨',
+  'Observabilidad total: trazas, métricas y cero pánico 📈',
+  '¡En mi máquina sí funcionaba! 🤷‍♂️💻',
+  'Git push --force y que la fuerza te acompañe 😅🚀',
+  'Dockerizando hasta la cafetera del DevFest ☕🐳',
+  '404: Bug no encontrado en producción 🐞✨',
+  '¡Un commit más y nos vamos al conversatorio! 🏃‍♂️💨',
+  'La arquitectura limpia salvó el sprint 🛡️🏗️'
+];
+
+let _lastQuoteIdx = -1;
+function getRandomTechQuote() {
+  let idx;
+  do {
+    idx = Math.floor(Math.random() * _TECH_QUOTES.length);
+  } while (idx === _lastQuoteIdx && _TECH_QUOTES.length > 1);
+  _lastQuoteIdx = idx;
+  return _TECH_QUOTES[idx];
+}
+
+// Control de globitos de diálogo activos
+let _currentBubbleEl = null;
+let _bubbleDismissTimer = null;
+
+function dismissActiveBubble() {
+  if (_bubbleDismissTimer) {
+    clearTimeout(_bubbleDismissTimer);
+    _bubbleDismissTimer = null;
+  }
+  if (_currentBubbleEl) {
+    const el = _currentBubbleEl;
+    _currentBubbleEl = null;
+    el.classList.add('bubble-fade-out');
+    setTimeout(() => {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    }, 240);
+  }
+}
+
+/**
+ * Muestra un globito de diálogo retro sobre el muñequito 8-bits
+ */
+function showSpeechBubble(anchorEl, text) {
+  dismissActiveBubble();
+
+  const container = anchorEl.classList.contains('block-avatar-frame')
+    ? (anchorEl.parentElement || anchorEl)
+    : anchorEl;
+
+  const bubble = document.createElement('div');
+  bubble.className = 'speaker-speech-bubble';
+  bubble.setAttribute('role', 'status');
+  bubble.textContent = text;
+
+  container.appendChild(bubble);
+  _currentBubbleEl = bubble;
+
+  // Si está demasiado cerca del borde superior de la pantalla, posicionarlo debajo
+  const rect = bubble.getBoundingClientRect();
+  if (rect.top < 12) {
+    bubble.classList.add('bubble-position-below');
+  }
+
+  _bubbleDismissTimer = setTimeout(() => {
+    dismissActiveBubble();
+  }, 2800);
+}
+
+// Cerrar globito si se hace clic fuera
+document.addEventListener('click', e => {
+  if (
+    _currentBubbleEl &&
+    !e.target.closest('.speaker-speech-bubble') &&
+    !e.target.closest('.block-avatar-frame, .plenary-avatar-col')
+  ) {
+    dismissActiveBubble();
+  }
+});
+
 // Estado de progreso de las misiones
 const _secretState = {
-  // Misión 1 (Armando: Kotlin badge x3 -> Sala 3 taller x3)
+  // Misión 1 (Armando: Kotlin badge x3 -> Muñequito en Sala 3 x3)
   m1_step1_count: 0,
   m1_step1_ready: false,
   m1_step2_count: 0,
   m1_reset_timer: null,
+  m1_step2_timer: null,
 
-  // Misión 2 (Nico: 4 colores GDG en orden -> Sala 2 taller x3)
+  // Misión 2 (Nico: 4 colores GDG en orden -> Muñequito en Sala 2 x3)
   m2_color_sequence: [],
   m2_step1_ready: false,
   m2_step2_count: 0,
-  m2_reset_timer: null
+  m2_reset_timer: null,
+  m2_step2_timer: null
 };
 
 /**
  * Muestra el modal retro con el secreto desbloqueado
  */
 function showSecretModal(htmlContent) {
+  dismissActiveBubble();
   audioEngine.victoryFanfare();
   triggerHaptic('unlock');
 
@@ -167,12 +272,163 @@ function showSecretModal(htmlContent) {
 }
 
 /**
+ * Manejador de clics en el muñequito 8-bits de Armando Picón (Sala 3: t1-sala3-1)
+ */
+function handleArmandoSpriteClick(spriteFrame) {
+  audioEngine.stepBeep();
+  triggerHaptic('step');
+  flashGlitch(spriteFrame);
+
+  if (_secretState.m1_step1_ready) {
+    _secretState.m1_step2_count++;
+
+    if (_secretState.m1_step2_count === 1) {
+      showSpeechBubble(spriteFrame, '¡Paso 2/3 activado! 🤖⚡');
+    } else if (_secretState.m1_step2_count === 2) {
+      showSpeechBubble(spriteFrame, '¡Paso 3/3 casi listo...! 🤖🔥');
+    } else if (_secretState.m1_step2_count >= 3) {
+      dismissActiveBubble();
+      _secretState.m1_step1_ready = false;
+      _secretState.m1_step2_count = 0;
+
+      const key = ['KOTLIN', 'DEV', 'PICON', '2026'].join('_');
+      const decryptedHtml = _decodePayload(_CIPHER_BANK.k0, key);
+      if (decryptedHtml) {
+        showSecretModal(decryptedHtml);
+      }
+    }
+
+    clearTimeout(_secretState.m1_step2_timer);
+    _secretState.m1_step2_timer = setTimeout(() => {
+      _secretState.m1_step2_count = 0;
+    }, 4500);
+  } else {
+    // Pista enigmática sin revelar la solución
+    showSpeechBubble(spriteFrame, '¡El robot Kotlin en el inicio guarda un misterio...! 🤖🔍');
+  }
+}
+
+/**
+ * Manejador de clics en el muñequito 8-bits de Nicolás Lecaros (Sala 2: t2-sala2-1)
+ */
+function handleNicolasSpriteClick(spriteFrame) {
+  audioEngine.stepBeep();
+  triggerHaptic('step');
+  flashGlitch(spriteFrame);
+
+  if (_secretState.m2_step1_ready) {
+    _secretState.m2_step2_count++;
+
+    if (_secretState.m2_step2_count === 1) {
+      showSpeechBubble(spriteFrame, '¡Paso 2/3 activado! ☁️⚡');
+    } else if (_secretState.m2_step2_count === 2) {
+      showSpeechBubble(spriteFrame, '¡Paso 3/3 casi listo...! ☁️🔥');
+    } else if (_secretState.m2_step2_count >= 3) {
+      dismissActiveBubble();
+      _secretState.m2_step1_ready = false;
+      _secretState.m2_step2_count = 0;
+
+      const key = ['GDG', 'CLOUD', 'NICOLAS', '2026'].join('_');
+      const decryptedHtml = _decodePayload(_CIPHER_BANK.c1, key);
+      if (decryptedHtml) {
+        showSecretModal(decryptedHtml);
+      }
+    }
+
+    clearTimeout(_secretState.m2_step2_timer);
+    _secretState.m2_step2_timer = setTimeout(() => {
+      _secretState.m2_step2_count = 0;
+    }, 4500);
+  } else {
+    // Pista enigmática sin revelar la solución
+    showSpeechBubble(spriteFrame, '¡Los 4 colores de Google en el menú guardan un secreto...! 🎨🔍');
+  }
+}
+
+/**
+ * Gestor unificado de interacciones en los muñequitos 8-bits del programa.
+ * Intercepta clics en fase CAPTURE para que no se abra el modal de la tarjeta.
+ */
+function initSpriteInteractions() {
+  const scheduleRoot = document.getElementById('schedule-root');
+  if (!scheduleRoot) return;
+
+  scheduleRoot.addEventListener(
+    'click',
+    e => {
+      const spriteFrame = e.target.closest('.block-avatar-frame, .plenary-avatar-col');
+      if (!spriteFrame) return; // Clic en el resto de la tarjeta: abre la sesión normalmente
+
+      // Es un muñequito 8-bits: detenemos propagación para no abrir el detalle de sesión
+      e.stopPropagation();
+      e.preventDefault();
+
+      const card = spriteFrame.closest('[data-block-id]');
+      const blockId = card ? card.getAttribute('data-block-id') : null;
+
+      // Armando Picón (Misión 1, Sala 3: t1-sala3-1)
+      if (blockId === 't1-sala3-1') {
+        handleArmandoSpriteClick(spriteFrame);
+        return;
+      }
+
+      // Nicolás Lecaros (Misión 2, Sala 2: t2-sala2-1)
+      if (blockId === 't2-sala2-1') {
+        handleNicolasSpriteClick(spriteFrame);
+        return;
+      }
+
+      // Cualquier otro speaker o tarjeta plenaria: beep, haptic, glitch y frase random
+      audioEngine.stepBeep();
+      triggerHaptic('step');
+      flashGlitch(spriteFrame);
+
+      const quote = getRandomTechQuote();
+      showSpeechBubble(spriteFrame, quote);
+    },
+    true // capture: true para interceptar antes del handler del contenedor de tarjeta
+  );
+
+  // Soporte de interacción por teclado (Enter / Barra espaciadora)
+  scheduleRoot.addEventListener(
+    'keydown',
+    e => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const spriteFrame = e.target.closest('.block-avatar-frame, .plenary-avatar-col');
+      if (!spriteFrame) return;
+
+      e.stopPropagation();
+      e.preventDefault();
+
+      const card = spriteFrame.closest('[data-block-id]');
+      const blockId = card ? card.getAttribute('data-block-id') : null;
+
+      if (blockId === 't1-sala3-1') {
+        handleArmandoSpriteClick(spriteFrame);
+        return;
+      }
+
+      if (blockId === 't2-sala2-1') {
+        handleNicolasSpriteClick(spriteFrame);
+        return;
+      }
+
+      audioEngine.stepBeep();
+      triggerHaptic('step');
+      flashGlitch(spriteFrame);
+
+      const quote = getRandomTechQuote();
+      showSpeechBubble(spriteFrame, quote);
+    },
+    true
+  );
+}
+
+/**
  * Inicializa la Misión 1: Armando Picón
  * Paso 1: 3 toques seguidos en el badge de Kotlin en el Hero
- * Paso 2: 3 toques seguidos en la tarjeta del taller de Armando en Sala 3
  */
 function initMissionArmando() {
-  // Paso 1: Badge de Kotlin en el Hero
   const techList = document.getElementById('hero-tech-badges');
   if (techList) {
     techList.addEventListener('click', e => {
@@ -197,43 +453,13 @@ function initMissionArmando() {
       }, 4000);
     });
   }
-
-  // Paso 2: Tarjeta del taller de Armando (t1-sala3-1)
-  const scheduleRoot = document.getElementById('schedule-root');
-  if (scheduleRoot) {
-    scheduleRoot.addEventListener('click', e => {
-      const card = e.target.closest('[data-block-id="t1-sala3-1"]');
-      if (!card) return;
-
-      if (!_secretState.m1_step1_ready) return;
-
-      _secretState.m1_step2_count++;
-      triggerHaptic('step');
-      audioEngine.stepBeep();
-      flashGlitch(card);
-
-      if (_secretState.m1_step2_count >= 3) {
-        _secretState.m1_step1_ready = false;
-        _secretState.m1_step2_count = 0;
-
-        // Clave generada en tiempo de ejecución para descifrar payload
-        const key = ['KOTLIN', 'DEV', 'PICON', '2026'].join('_');
-        const decryptedHtml = _decodePayload(_CIPHER_BANK.k0, key);
-        if (decryptedHtml) {
-          showSecretModal(decryptedHtml);
-        }
-      }
-    });
-  }
 }
 
 /**
  * Inicializa la Misión 2: Nicolás Lecaros
- * Paso 1: Tocar los 4 colores GDG en orden: Azul -> Rojo -> Amarillo -> Verde
- * Paso 2: 3 toques seguidos en la tarjeta del taller de Nico en Sala 2 (t2-sala2-1)
+ * Paso 1: Tocar los 4 colores GDG en orden en la barra superior: Azul -> Rojo -> Amarillo -> Verde
  */
 function initMissionNicolas() {
-  // Paso 1: Tira de colores GDG del header
   const colorStrip = document.querySelector('.site-header .gdg-color-strip');
   if (colorStrip) {
     const spans = colorStrip.querySelectorAll('span');
@@ -264,40 +490,13 @@ function initMissionNicolas() {
       });
     });
   }
-
-  // Paso 2: Tarjeta del taller de Nicolás (t2-sala2-1)
-  const scheduleRoot = document.getElementById('schedule-root');
-  if (scheduleRoot) {
-    scheduleRoot.addEventListener('click', e => {
-      const card = e.target.closest('[data-block-id="t2-sala2-1"]');
-      if (!card) return;
-
-      if (!_secretState.m2_step1_ready) return;
-
-      _secretState.m2_step2_count++;
-      triggerHaptic('step');
-      audioEngine.stepBeep();
-      flashGlitch(card);
-
-      if (_secretState.m2_step2_count >= 3) {
-        _secretState.m2_step1_ready = false;
-        _secretState.m2_step2_count = 0;
-
-        // Clave generada en tiempo de ejecución para descifrar payload
-        const key = ['GDG', 'CLOUD', 'NICOLAS', '2026'].join('_');
-        const decryptedHtml = _decodePayload(_CIPHER_BANK.c1, key);
-        if (decryptedHtml) {
-          showSecretModal(decryptedHtml);
-        }
-      }
-    });
-  }
 }
 
 /**
- * Punto de entrada del sistema de misiones secretas
+ * Punto de entrada del sistema de misiones secretas y sprites interactivos
  */
 export function initSecretQuests() {
   initMissionArmando();
   initMissionNicolas();
+  initSpriteInteractions();
 }

@@ -1278,6 +1278,27 @@ body {
   border: 2px solid var(--bw-black);
   padding: 4px;
   flex-shrink: 0;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.12s steps(2);
+}
+
+.block-avatar-frame:hover {
+  transform: scale(1.08);
+}
+
+.plenary-avatar-col {
+  background-color: var(--bw-gray-100);
+  border: 2px solid var(--bw-black);
+  padding: 4px;
+  flex-shrink: 0;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.12s steps(2);
+}
+
+.plenary-avatar-col:hover {
+  transform: scale(1.08);
 }
 
 .block-avatar-combo .speaker-photo-circle {
@@ -2496,4 +2517,72 @@ body {
   font-size: 0.85rem;
   color: var(--bw-gray-700);
   font-style: italic;
+}
+
+/* ============================================================================
+ * GLOBO DE DIÁLOGO RETRO 8-BITS (SPEAKER SPRITE SPEECH BUBBLES)
+ * ============================================================================ */
+.speaker-speech-bubble {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  z-index: 60;
+  background-color: var(--bw-white);
+  color: var(--bw-black);
+  border: 3px solid var(--bw-black);
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.9);
+  padding: 8px 12px;
+  min-width: 170px;
+  max-width: min(260px, 82vw);
+  font-family: var(--font-arcade);
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1.35;
+  pointer-events: none;
+  word-break: break-word;
+  animation: bubblePopIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.speaker-speech-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -7px;
+  left: 18px;
+  width: 10px;
+  height: 10px;
+  background-color: var(--bw-white);
+  border-right: 3px solid var(--bw-black);
+  border-bottom: 3px solid var(--bw-black);
+  transform: rotate(45deg);
+}
+
+.speaker-speech-bubble.bubble-position-below {
+  bottom: auto;
+  top: calc(100% + 10px);
+}
+
+.speaker-speech-bubble.bubble-position-below::after {
+  bottom: auto;
+  top: -7px;
+  border-right: none;
+  border-bottom: none;
+  border-left: 3px solid var(--bw-black);
+  border-top: 3px solid var(--bw-black);
+}
+
+.speaker-speech-bubble.bubble-fade-out {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.96);
+  transition: opacity 0.22s ease-out, transform 0.22s ease-out;
+}
+
+@keyframes bubblePopIn {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

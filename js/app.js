@@ -342,7 +342,7 @@ function renderPlenaryCard(block) {
         <span class="time-pill">🕒 ${block.startTime} – ${block.endTime}</span>
         <span class="duration-micro">${durationMinutes} MIN</span>
       </div>
-      <div class="plenary-avatar-col">
+      <div class="plenary-avatar-col" tabindex="0" role="button" aria-label="Personaje 8-bits de ${block.title}" title="¡Tócame! 👾">
         ${renderKunioCharacter(block.avatar || 'panel', 'kunio-sm')}
       </div>
       <div class="plenary-info-col">
@@ -438,7 +438,7 @@ function renderTrackBlockCard(block, room) {
       <div class="block-main-body">
         <div class="block-speaker-row">
           <div class="block-avatar-combo">
-            <div class="block-avatar-frame">
+            <div class="block-avatar-frame" tabindex="0" role="button" aria-label="Personaje 8-bits de ${block.speaker || block.title}" title="¡Tócame! 👾">
               ${renderKunioCharacter(block.avatar, 'kunio-sm')}
             </div>
             ${circularAvatarHtml}
