@@ -60,6 +60,48 @@ class RetroAudioEngine {
       osc.stop(this.ctx.currentTime + 0.08);
     } catch (e) {}
   }
+  colorBeep(idx) {
+    try {
+      this._init();
+      if (!this.ctx) return;
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+      // Frecuencias musicales para Azul, Rojo, Amarillo, Verde (A4, C#5, E5, A5)
+      const freqs = [440, 554.37, 659.25, 880];
+      const freq = freqs[idx] || 587.33;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+      gain.gain.setValueAtTime(0.09, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.1);
+    } catch (e) {}
+  }
+  powerUpJingle() {
+    try {
+      this._init();
+      if (!this.ctx) return;
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+      // Melodía corta ascendente de 4 notas rápidas (E5, G5, B5, E6)
+      const notes = [659.25, 783.99, 987.77, 1318.51];
+      notes.forEach((freq, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const t = this.ctx.currentTime + idx * 0.075;
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0.1, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.1);
+      });
+    } catch (e) {}
+  }
   victoryFanfare() {
     try {
       this._init();
@@ -165,9 +207,9 @@ function dismissActiveBubble() {
 }
 
 /**
- * Muestra un globito de diálogo retro sobre el muñequito 8-bits
+ * Muestra un globito de diálogo retro sobre el muñequito 8-bits u otro elemento ancla
  */
-function showSpeechBubble(anchorEl, text) {
+function showSpeechBubble(anchorEl, text, forcePosition = null) {
   dismissActiveBubble();
 
   const container = anchorEl.classList.contains('block-avatar-frame')
@@ -182,15 +224,19 @@ function showSpeechBubble(anchorEl, text) {
   container.appendChild(bubble);
   _currentBubbleEl = bubble;
 
-  // Si está demasiado cerca del borde superior de la pantalla, posicionarlo debajo
-  const rect = bubble.getBoundingClientRect();
-  if (rect.top < 12) {
+  if (forcePosition === 'below' || anchorEl.classList.contains('gdg-color-strip')) {
     bubble.classList.add('bubble-position-below');
+  } else {
+    // Si está demasiado cerca del borde superior de la pantalla, posicionarlo debajo
+    const rect = bubble.getBoundingClientRect();
+    if (rect.top < 14) {
+      bubble.classList.add('bubble-position-below');
+    }
   }
 
   _bubbleDismissTimer = setTimeout(() => {
     dismissActiveBubble();
-  }, 2800);
+  }, 3200);
 }
 
 // Cerrar globito si se hace clic fuera
@@ -283,9 +329,9 @@ function handleArmandoSpriteClick(spriteFrame) {
     _secretState.m1_step2_count++;
 
     if (_secretState.m1_step2_count === 1) {
-      showSpeechBubble(spriteFrame, '¡Paso 2/3 activado! 🤖⚡');
+      showSpeechBubble(spriteFrame, '¡Conexión Kotlin recibida (1/3)! 🟣⚡');
     } else if (_secretState.m1_step2_count === 2) {
-      showSpeechBubble(spriteFrame, '¡Paso 3/3 casi listo...! 🤖🔥');
+      showSpeechBubble(spriteFrame, '¡Casi listo (2/3)...! 🟣🔥');
     } else if (_secretState.m1_step2_count >= 3) {
       dismissActiveBubble();
       _secretState.m1_step1_ready = false;
@@ -304,7 +350,7 @@ function handleArmandoSpriteClick(spriteFrame) {
     }, 4500);
   } else {
     // Pista enigmática sin revelar la solución
-    showSpeechBubble(spriteFrame, '¡El robot Kotlin en el inicio guarda un misterio...! 🤖🔍');
+    showSpeechBubble(spriteFrame, '¡El símbolo de Kotlin en el inicio guarda un misterio...! 🟣🔍');
   }
 }
 
@@ -320,9 +366,9 @@ function handleNicolasSpriteClick(spriteFrame) {
     _secretState.m2_step2_count++;
 
     if (_secretState.m2_step2_count === 1) {
-      showSpeechBubble(spriteFrame, '¡Paso 2/3 activado! ☁️⚡');
+      showSpeechBubble(spriteFrame, '¡Frecuencia GDG sintonizada (1/3)! ☁️⚡');
     } else if (_secretState.m2_step2_count === 2) {
-      showSpeechBubble(spriteFrame, '¡Paso 3/3 casi listo...! ☁️🔥');
+      showSpeechBubble(spriteFrame, '¡Casi listo (2/3)...! ☁️🔥');
     } else if (_secretState.m2_step2_count >= 3) {
       dismissActiveBubble();
       _secretState.m2_step1_ready = false;
@@ -439,18 +485,27 @@ function initMissionArmando() {
 
       _secretState.m1_step1_count++;
       clearTimeout(_secretState.m1_reset_timer);
-      triggerHaptic('step');
-      audioEngine.stepBeep();
       flashGlitch(badge);
 
-      if (_secretState.m1_step1_count >= 3) {
+      if (_secretState.m1_step1_count === 1) {
+        audioEngine.stepBeep();
+        triggerHaptic('step');
+        showSpeechBubble(badge, '⚡ Sintonía Kotlin (1/3)...');
+      } else if (_secretState.m1_step1_count === 2) {
+        audioEngine.stepBeep();
+        triggerHaptic('step');
+        showSpeechBubble(badge, '⚡ Sintonía Kotlin (2/3)...');
+      } else if (_secretState.m1_step1_count >= 3) {
         _secretState.m1_step1_ready = true;
         _secretState.m1_step1_count = 0;
+        audioEngine.powerUpJingle();
+        triggerHaptic('unlock');
+        showSpeechBubble(badge, '✨ ¡Sintonía Kotlin lista! Busca a Armando en Sala 3... 🏃‍♂️💨');
       }
 
       _secretState.m1_reset_timer = setTimeout(() => {
         _secretState.m1_step1_count = 0;
-      }, 4000);
+      }, 5000);
     });
   }
 }
@@ -468,19 +523,33 @@ function initMissionNicolas() {
       span.style.cursor = 'pointer';
       span.addEventListener('click', e => {
         e.stopPropagation();
-        triggerHaptic('step');
-        audioEngine.stepBeep();
         flashGlitch(span);
 
         const expectedIdx = _secretState.m2_color_sequence.length;
         if (idx === expectedIdx) {
           _secretState.m2_color_sequence.push(idx);
+          triggerHaptic('step');
+          audioEngine.colorBeep(idx);
+
           if (_secretState.m2_color_sequence.length === 4) {
             _secretState.m2_step1_ready = true;
             _secretState.m2_color_sequence = [];
+            audioEngine.powerUpJingle();
+            triggerHaptic('unlock');
+            showSpeechBubble(
+              colorStrip,
+              '🌈 ¡Secuencia GDG correcta! Busca a Nico en Sala 2... 🏃‍♂️💨',
+              'below'
+            );
           }
         } else {
           _secretState.m2_color_sequence = idx === 0 ? [0] : [];
+          if (idx === 0) {
+            triggerHaptic('step');
+            audioEngine.colorBeep(0);
+          } else {
+            audioEngine.stepBeep();
+          }
         }
 
         clearTimeout(_secretState.m2_reset_timer);
