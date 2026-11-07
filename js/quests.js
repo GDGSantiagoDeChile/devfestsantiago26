@@ -694,12 +694,12 @@ function initArcadeCoinCounter() {
       audioEngine.powerUpJingle();
       triggerHaptic('unlock');
       launchPixelConfetti();
-      showSpeechBubble(coinBtn, '🪙 ¡FREE PLAY ACTIVADO! Modo arcade desbloqueado 🕹️', 'below', 6500);
+      showSpeechBubble(coinBtn, '🪙 ¡FREE PLAY ACTIVADO! Modo arcade desbloqueado 🕹️', null, 6500);
     } else if (_coinsCount === 25) {
       audioEngine.victoryFanfare();
       triggerHaptic('unlock');
       launchPixelConfetti();
-      showSpeechBubble(coinBtn, '🏆 ¡MAESTRO DEL ARCADE! Créditos infinitos para el DevFest 🚀', 'below', 6500);
+      showSpeechBubble(coinBtn, '🏆 ¡MAESTRO DEL ARCADE! Créditos infinitos para el DevFest 🚀', null, 6500);
     }
   });
 }

@@ -2001,6 +2001,20 @@ body {
   gap: 18px;
 }
 
+.footer-arcade-bar {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .footer-arcade-bar {
+    width: 100%;
+    justify-content: center;
+    margin: 8px 0;
+  }
+}
+
 .footer-copy {
   font-size: 0.88rem;
   color: var(--bw-gray-300);
