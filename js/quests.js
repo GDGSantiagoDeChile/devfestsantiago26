@@ -209,7 +209,7 @@ function dismissActiveBubble() {
 /**
  * Muestra un globito de diálogo retro sobre el muñequito 8-bits u otro elemento ancla
  */
-function showSpeechBubble(anchorEl, text, forcePosition = null) {
+function showSpeechBubble(anchorEl, text, forcePosition = null, durationMs = 4500) {
   dismissActiveBubble();
 
   const container = anchorEl.classList.contains('block-avatar-frame')
@@ -236,15 +236,16 @@ function showSpeechBubble(anchorEl, text, forcePosition = null) {
 
   _bubbleDismissTimer = setTimeout(() => {
     dismissActiveBubble();
-  }, 3200);
+  }, durationMs);
 }
 
-// Cerrar globito si se hace clic fuera
+// Cerrar globito si se hace clic fuera de cualquier elemento interactivo del juego
 document.addEventListener('click', e => {
   if (
     _currentBubbleEl &&
-    !e.target.closest('.speaker-speech-bubble') &&
-    !e.target.closest('.block-avatar-frame, .plenary-avatar-col')
+    !e.target.closest(
+      '.speaker-speech-bubble, .block-avatar-frame, .plenary-avatar-col, .tech-badge-8bit, .gdg-color-strip'
+    )
   ) {
     dismissActiveBubble();
   }
@@ -329,9 +330,9 @@ function handleArmandoSpriteClick(spriteFrame) {
     _secretState.m1_step2_count++;
 
     if (_secretState.m1_step2_count === 1) {
-      showSpeechBubble(spriteFrame, '¡Conexión Kotlin recibida (1/3)! 🟣⚡');
+      showSpeechBubble(spriteFrame, '¡Conexión Kotlin recibida (1/3)! 🟣⚡', null, 3000);
     } else if (_secretState.m1_step2_count === 2) {
-      showSpeechBubble(spriteFrame, '¡Casi listo (2/3)...! 🟣🔥');
+      showSpeechBubble(spriteFrame, '¡Casi listo (2/3)...! 🟣🔥', null, 3000);
     } else if (_secretState.m1_step2_count >= 3) {
       dismissActiveBubble();
       _secretState.m1_step1_ready = false;
@@ -347,10 +348,10 @@ function handleArmandoSpriteClick(spriteFrame) {
     clearTimeout(_secretState.m1_step2_timer);
     _secretState.m1_step2_timer = setTimeout(() => {
       _secretState.m1_step2_count = 0;
-    }, 4500);
+    }, 5000);
   } else {
     // Pista enigmática sin revelar la solución
-    showSpeechBubble(spriteFrame, '¡El símbolo de Kotlin en el inicio guarda un misterio...! 🟣🔍');
+    showSpeechBubble(spriteFrame, '¡El símbolo de Kotlin en el inicio guarda un misterio...! 🟣🔍', null, 6000);
   }
 }
 
@@ -366,9 +367,9 @@ function handleNicolasSpriteClick(spriteFrame) {
     _secretState.m2_step2_count++;
 
     if (_secretState.m2_step2_count === 1) {
-      showSpeechBubble(spriteFrame, '¡Frecuencia GDG sintonizada (1/3)! ☁️⚡');
+      showSpeechBubble(spriteFrame, '¡Frecuencia GDG sintonizada (1/3)! ☁️⚡', null, 3000);
     } else if (_secretState.m2_step2_count === 2) {
-      showSpeechBubble(spriteFrame, '¡Casi listo (2/3)...! ☁️🔥');
+      showSpeechBubble(spriteFrame, '¡Casi listo (2/3)...! ☁️🔥', null, 3000);
     } else if (_secretState.m2_step2_count >= 3) {
       dismissActiveBubble();
       _secretState.m2_step1_ready = false;
@@ -384,10 +385,10 @@ function handleNicolasSpriteClick(spriteFrame) {
     clearTimeout(_secretState.m2_step2_timer);
     _secretState.m2_step2_timer = setTimeout(() => {
       _secretState.m2_step2_count = 0;
-    }, 4500);
+    }, 5000);
   } else {
     // Pista enigmática sin revelar la solución
-    showSpeechBubble(spriteFrame, '¡Los 4 colores de Google en el menú guardan un secreto...! 🎨🔍');
+    showSpeechBubble(spriteFrame, '¡Los 4 colores de Google en el menú guardan un secreto...! 🎨🔍', null, 6000);
   }
 }
 
@@ -483,6 +484,7 @@ function initMissionArmando() {
       const title = badge.getAttribute('title') || '';
       if (!title.toLowerCase().includes('kotlin')) return;
 
+      e.stopPropagation();
       _secretState.m1_step1_count++;
       clearTimeout(_secretState.m1_reset_timer);
       flashGlitch(badge);
@@ -490,22 +492,22 @@ function initMissionArmando() {
       if (_secretState.m1_step1_count === 1) {
         audioEngine.stepBeep();
         triggerHaptic('step');
-        showSpeechBubble(badge, '⚡ Sintonía Kotlin (1/3)...');
+        showSpeechBubble(badge, '⚡ Sintonía Kotlin (1/3)...', null, 2500);
       } else if (_secretState.m1_step1_count === 2) {
         audioEngine.stepBeep();
         triggerHaptic('step');
-        showSpeechBubble(badge, '⚡ Sintonía Kotlin (2/3)...');
+        showSpeechBubble(badge, '⚡ Sintonía Kotlin (2/3)...', null, 2500);
       } else if (_secretState.m1_step1_count >= 3) {
         _secretState.m1_step1_ready = true;
         _secretState.m1_step1_count = 0;
         audioEngine.powerUpJingle();
         triggerHaptic('unlock');
-        showSpeechBubble(badge, '✨ ¡Sintonía Kotlin lista! Busca a Armando en Sala 3... 🏃‍♂️💨');
+        showSpeechBubble(badge, '✨ ¡Sintonía Kotlin lista! Busca a Armando en Sala 3... 🏃‍♂️💨', null, 6500);
       }
 
       _secretState.m1_reset_timer = setTimeout(() => {
         _secretState.m1_step1_count = 0;
-      }, 5000);
+      }, 6000);
     });
   }
 }
@@ -539,7 +541,8 @@ function initMissionNicolas() {
             showSpeechBubble(
               colorStrip,
               '🌈 ¡Secuencia GDG correcta! Busca a Nico en Sala 2... 🏃‍♂️💨',
-              'below'
+              'below',
+              6500
             );
           }
         } else {
@@ -555,7 +558,7 @@ function initMissionNicolas() {
         clearTimeout(_secretState.m2_reset_timer);
         _secretState.m2_reset_timer = setTimeout(() => {
           _secretState.m2_color_sequence = [];
-        }, 5000);
+        }, 6000);
       });
     });
   }
