@@ -259,18 +259,21 @@
             "startTime": "12:05",
             "endTime": "12:45",
             "durationNote": "40 minutos (30 min charla + 10 min preguntas) · Auditorio Principal",
-            "title": "Observabilidad Moderna y Rendimiento en Sistemas Cloud-Native",
+            "title": "Del POC a producción: cómo desbloquear proyectos de IA en Google Cloud",
             "speaker": "Eduardo Miranda",
             "affiliation": "Datadog",
             "badge": "Datadog",
             "badgeColor": "blue",
             "avatar": "eduardo",
-            "speakerPhoto": null,
-            "speakerBio": null,
+            "speakerPhoto": "assets/img/speakers/eduardo.jpg",
+            "speakerPhotoAltUrl": "https://drive.google.com/thumbnail?id=17FaERHdio56W7BNQ6FJLKQ4YKxf2eaif&sz=w256",
+            "speakerCountry": "Chile",
+            "speakerCountryFlag": "🇨🇱",
+            "speakerBio": "A Eduardo le encantan los videojuegos y el anime, y es un apasionado de la tecnología. Especialista en observabilidad y sistemas cloud en Datadog.",
             "roomLabel": "AUDITORIO",
             "description": "Sesión técnica en el Auditorio Principal con Eduardo Miranda (Datadog). Analizaremos cómo monitorear, entender y optimizar aplicaciones modernas distribuidas y servicios potenciados por IA en producción sin perder visibilidad de extremo a extremo.",
-            "tags": ["Observabilidad", "Datadog", "Cloud Native", "DevOps & SRE"],
-            "techLogos": ["datadog", "cloud"]
+            "tags": ["Observabilidad", "Datadog", "Google Cloud", "Agentes IA", "Producción"],
+            "techLogos": ["datadog", "cloud", "ai"]
           }
         ],
         "sala1": [
