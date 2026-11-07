@@ -1,5 +1,6 @@
 import { EVENT_DATA } from '../data/devfest-data.js';
 import { renderKunioCharacter, renderKunioHeadshot, renderTechBadge } from './sprites.js';
+import { initSecretQuests } from './quests.js';
 
 // Estado de la aplicación
 const state = {
@@ -933,4 +934,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   initHeroSprites();
   renderFullSchedule();
+  initSecretQuests();
 });

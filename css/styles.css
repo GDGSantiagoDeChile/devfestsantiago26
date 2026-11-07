@@ -2371,3 +2371,129 @@ body {
     text-align: left;
   }
 }
+
+/* ==========================================================================
+   10. ESTILOS DE MISIONES SECRETAS & EASTER EGGS
+   ========================================================================== */
+.secret-pulse {
+  animation: secretPulseAnim 0.3s steps(2, end) !important;
+}
+
+@keyframes secretPulseAnim {
+  0% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.08) translateY(-2px); filter: brightness(1.7) drop-shadow(0 0 8px var(--gdg-yellow)); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+.secret-modal-overlay {
+  background-color: rgba(0, 0, 0, 0.88);
+  z-index: 2000;
+}
+
+.secret-quest-window {
+  border: 4px solid var(--bw-black);
+  box-shadow: 10px 10px 0px var(--bw-black);
+  max-width: 640px;
+}
+
+.quest-modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  padding: 6px 4px;
+}
+
+.quest-icon-banner {
+  font-size: 2.2rem;
+  letter-spacing: 6px;
+  animation: starBlink 1.2s steps(2) infinite;
+}
+
+.quest-badge-tag {
+  font-family: var(--font-arcade);
+  font-weight: 700;
+  font-size: 0.78rem;
+  background-color: var(--gdg-yellow);
+  color: var(--bw-black);
+  border: 2px solid var(--bw-black);
+  padding: 4px 12px;
+  box-shadow: 2px 2px 0 var(--bw-black);
+}
+
+.quest-title {
+  font-family: var(--font-pixel);
+  font-size: clamp(1rem, 3vw, 1.4rem);
+  color: var(--bw-black);
+  line-height: 1.35;
+  text-shadow: 2px 2px 0 var(--bw-gray-300);
+}
+
+.quest-lead {
+  font-size: 0.98rem;
+  color: var(--bw-gray-800);
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.quest-mission-card {
+  background-color: var(--bw-gray-100);
+  border: 3px solid var(--bw-black);
+  box-shadow: var(--pixel-shadow-sm);
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  width: 100%;
+}
+
+.quest-mission-label {
+  font-family: var(--font-arcade);
+  font-size: 0.72rem;
+  font-weight: 700;
+  background-color: var(--bw-black);
+  color: var(--gdg-yellow);
+  padding: 3px 10px;
+}
+
+.quest-code-pill {
+  font-family: var(--font-pixel);
+  font-size: clamp(1rem, 3.5vw, 1.35rem);
+  color: var(--bw-black);
+  background-color: var(--bw-white);
+  border: 3px dashed var(--bw-black);
+  padding: 8px 18px;
+  margin: 4px 0;
+  letter-spacing: 2px;
+  user-select: all;
+}
+
+.quest-action-goal {
+  font-size: 0.98rem;
+  color: var(--bw-gray-900);
+}
+
+.quest-alert-box {
+  background-color: var(--gdg-yellow-soft);
+  border: 2px solid var(--bw-black);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.quest-warning-text {
+  font-size: 0.92rem;
+  color: var(--gdg-red-dark);
+  font-weight: 700;
+}
+
+.quest-hint-text {
+  font-size: 0.85rem;
+  color: var(--bw-gray-700);
+  font-style: italic;
+}
